@@ -15,20 +15,5 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-use std::fs::File;
-
-mod markdown;
-mod minecraft;
-mod stendhal;
-
-pub trait Parser {
-    /// Parse a string of a certain format into a [CommonMark][1] Markdown file.
-    ///
-    /// [1]: https://commonmark.org/
-    fn parse_string_to_markdown(input: &str) -> Vec<&str>;
-
-    /// Parse a file of a certain format into a [CommonMark][1] Markdown file.
-    ///
-    /// [1]: https://commonmark.org/
-    fn parse_file_to_markdown<'l>(input: File) -> Vec<&'l str>;
-}
+pub const THEMATIC_BREAK: &str =
+    "______________________________________________________________________";

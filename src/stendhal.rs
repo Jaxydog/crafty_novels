@@ -14,3 +14,41 @@
 //
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
+
+#![allow(dead_code)]
+
+use std::fs::File;
+
+use crate::markdown;
+use crate::Parser;
+
+const START_OF_PAGE: &str = "#- ";
+
+struct Stendhal;
+
+impl Parser for Stendhal {
+    fn parse_string_to_markdown(input: &str) -> Vec<&str> {
+        let mut md = vec![];
+
+        for line in input.lines() {
+            let mut lines = vec![];
+
+            // Replace page starts (`#-`) with thematic breaks `---`
+            let line = match line.strip_prefix(START_OF_PAGE) {
+                Some(first_line_of_page) => {
+                    lines.push(markdown::THEMATIC_BREAK);
+                    first_line_of_page
+                }
+                None => line,
+            };
+
+            md.append(&mut lines);
+        }
+
+        md
+    }
+
+    fn parse_file_to_markdown<'l>(input: File) -> Vec<&'l str> {
+        todo!()
+    }
+}
