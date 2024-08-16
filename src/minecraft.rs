@@ -70,6 +70,11 @@ impl TryFrom<FormatCode> for Format {
 impl FromStr for Format {
     type Err = Error;
 
+    /// Get the character following the `§` in a Minecraft format code.
+    ///
+    /// Expects a two byte string that starts with `§`.
+    ///
+    /// Ex. The `0` in `§0`.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let code = get_code(s).ok_or(Error::InvalidFormatCodeString(s.to_string()))?;
 
@@ -122,12 +127,12 @@ impl From<Color> for ColorValue {
     }
 }
 
-/// The hexadecimal character following the § in the code assocated with a format code.
+/// The character following the § in the code assocated with a format code.
 ///
 /// Ex. The `0` in `§0`.
 pub type FormatCode = char;
 
-/// Get the hexadecimal character following the `§` in a Minecraft format code.
+/// Get the character following the `§` in a Minecraft format code.
 ///
 /// Expects a two byte string that starts with `§`.
 ///
@@ -146,7 +151,7 @@ pub fn get_code(str: &str) -> Option<FormatCode> {
 /// Represents a color as it is used for text formatting in Minecraft.
 #[derive(Clone)]
 pub struct ColorValue {
-    /// The hexadecimal character following the § in the code assocated with the color.
+    /// The character following the § in the code assocated with the color.
     ///
     /// Ex. The `0` in `§0`.
     pub code: FormatCode,
