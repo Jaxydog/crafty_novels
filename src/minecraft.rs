@@ -15,7 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-use std::fmt::{Display, UpperHex};
+use crate::error::Error;
+
+use std::{
+    fmt::{Display, UpperHex},
+    str::FromStr,
+};
 
 /// Represents the ways that Minecraft Java Edition will format text.
 pub enum Format {
@@ -29,43 +34,122 @@ pub enum Format {
     Reset,
 }
 
-// pub enum Color {}
+impl TryFrom<FormatCode> for Format {
+    type Error = Error;
+
+    /// Look up a [`code`][Self::code] against Minecraft Java Edition's list of formatting codes.
+    fn try_from(code: FormatCode) -> Result<Self, Self::Error> {
+        match code {
+            '0' => Ok(Format::Color(Color::Black)),
+            '1' => Ok(Format::Color(Color::DarkBlue)),
+            '2' => Ok(Format::Color(Color::DarkGreen)),
+            '3' => Ok(Format::Color(Color::DarkAqua)),
+            '4' => Ok(Format::Color(Color::DarkRed)),
+            '5' => Ok(Format::Color(Color::DarkPurple)),
+            '6' => Ok(Format::Color(Color::Gold)),
+            '7' => Ok(Format::Color(Color::Gray)),
+            '8' => Ok(Format::Color(Color::DarkGray)),
+            '9' => Ok(Format::Color(Color::Blue)),
+            'a' => Ok(Format::Color(Color::Green)),
+            'b' => Ok(Format::Color(Color::Aqua)),
+            'c' => Ok(Format::Color(Color::Red)),
+            'd' => Ok(Format::Color(Color::LightPurple)),
+            'e' => Ok(Format::Color(Color::Yellow)),
+            'f' => Ok(Format::Color(Color::White)),
+            'k' => Ok(Format::Obfuscated),
+            'l' => Ok(Format::Bold),
+            'm' => Ok(Format::Strikethrough),
+            'n' => Ok(Format::Underline),
+            'o' => Ok(Format::Italic),
+            'r' => Ok(Format::Reset),
+            code => Err(Error::NoSuchFormatCode(code)),
+        }
+    }
+}
+
+impl FromStr for Format {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let code = get_code(s).ok_or(Error::InvalidFormatCodeString(s.to_string()))?;
+
+        Self::try_from(code)
+    }
+}
+
+pub enum Color {
+    Black,
+    DarkBlue,
+    DarkGreen,
+    DarkAqua,
+    DarkRed,
+    DarkPurple,
+    Gold,
+    Gray,
+    DarkGray,
+    Blue,
+    Green,
+    Aqua,
+    Red,
+    LightPurple,
+    Yellow,
+    White,
+}
+
+impl From<Color> for ColorValue {
+    /// Get the values associated with a given `Color` in Minecraft Java Edition.
+    fn from(color: Color) -> Self {
+        use Color::*;
+
+        match color {
+            Black => ColorValue::new('0', "black", (0, 0, 0), (0, 0, 0)),
+            DarkBlue => ColorValue::new('1', "dark_blue", (0, 0, 170), (0, 0, 42)),
+            DarkGreen => ColorValue::new('2', "dark_green", (0, 170, 0), (0, 42, 0)),
+            DarkAqua => ColorValue::new('3', "dark_aqua", (0, 170, 170), (0, 42, 42)),
+            DarkRed => ColorValue::new('4', "dark_red", (170, 0, 0), (42, 0, 0)),
+            DarkPurple => ColorValue::new('5', "dark_purple", (170, 0, 170), (42, 0, 42)),
+            Gold => ColorValue::new('6', "gold", (255, 170, 0), (42, 42, 0)),
+            Gray => ColorValue::new('7', "gray", (170, 170, 170), (42, 42, 42)),
+            DarkGray => ColorValue::new('8', "dark_gray", (85, 85, 85), (21, 21, 21)),
+            Blue => ColorValue::new('9', "blue", (85, 85, 255), (21, 21, 63)),
+            Green => ColorValue::new('a', "green", (85, 255, 85), (21, 63, 21)),
+            Aqua => ColorValue::new('b', "aqua", (85, 255, 255), (21, 63, 63)),
+            Red => ColorValue::new('c', "red", (255, 85, 85), (63, 21, 21)),
+            LightPurple => ColorValue::new('d', "light_purple", (255, 85, 255), (63, 21, 63)),
+            Yellow => ColorValue::new('e', "yellow", (255, 255, 85), (63, 63, 21)),
+            White => ColorValue::new('f', "white", (255, 255, 255), (63, 63, 63)),
+        }
+    }
+}
+
+/// The hexadecimal character following the § in the code assocated with a format code.
+///
+/// Ex. The `0` in `§0`.
+pub type FormatCode = char;
 
 /// Get the hexadecimal character following the `§` in a Minecraft format code.
 ///
 /// Expects a two byte string that starts with `§`.
 ///
 /// Ex. The `0` in `§0`.
-pub fn get_code(str: &str) -> Option<char> {
+pub fn get_code(str: &str) -> Option<FormatCode> {
     Some(
         str.bytes()
             .skip(1) // Skip the `§`
             .take(1) // Take the code
             .collect::<Vec<u8>>()
             .first()?
-            .to_owned() as char,
+            .to_owned() as FormatCode,
     )
-}
-
-/// Look up a [`code`][Color::code] against Minecraft Java Edition's list of text formatting codes.
-pub fn get_format_from_code(code: char) -> Option<Format> {
-    match code {
-        'k' => Some(Format::Obfuscated),
-        'l' => Some(Format::Bold),
-        'm' => Some(Format::Underline),
-        'o' => Some(Format::Italic),
-        'r' => Some(Format::Reset),
-        code => Color::from_code(code).map(Format::Color),
-    }
 }
 
 /// Represents a color as it is used for text formatting in Minecraft.
 #[derive(Clone)]
-pub struct Color {
+pub struct ColorValue {
     /// The hexadecimal character following the § in the code assocated with the color.
     ///
     /// Ex. The `0` in `§0`.
-    pub code: char,
+    pub code: FormatCode,
     /// The proper name associated with the color.
     ///
     /// Ex. `gold`.
@@ -80,42 +164,15 @@ pub struct Color {
     pub bg: ColorTuple,
 }
 
-impl Color {
+impl ColorValue {
     /// Create a new instance of `Color`, doing type conversions where necessary.
-    pub fn new(code: char, name: &str, fg: (u8, u8, u8), bg: (u8, u8, u8)) -> Self {
+    pub fn new(code: FormatCode, name: &str, fg: (u8, u8, u8), bg: (u8, u8, u8)) -> Self {
         Self {
             code,
             name: name.to_string().into_boxed_str(),
             fg: fg.into(),
             bg: bg.into(),
         }
-    }
-
-    /// Look up a [`code`][Self::code] against Minecraft Java Edition's list of colors.
-    pub fn from_code(code: char) -> Option<Self> {
-        let colors = vec![
-            Color::new('0', "black", (0, 0, 0), (0, 0, 0)),
-            Color::new('1', "dark_blue", (0, 0, 170), (0, 0, 42)),
-            Color::new('2', "dark_green", (0, 170, 0), (0, 42, 0)),
-            Color::new('3', "dark_aqua", (0, 170, 170), (0, 42, 42)),
-            Color::new('4', "dark_red", (170, 0, 0), (42, 0, 0)),
-            Color::new('5', "dark_purple", (170, 0, 170), (42, 0, 42)),
-            Color::new('6', "gold", (255, 170, 0), (42, 42, 0)),
-            Color::new('7', "gray", (170, 170, 170), (42, 42, 42)),
-            Color::new('8', "dark_gray", (85, 85, 85), (21, 21, 21)),
-            Color::new('9', "blue", (85, 85, 255), (21, 21, 63)),
-            Color::new('a', "green", (85, 255, 85), (21, 63, 21)),
-            Color::new('b', "aqua", (85, 255, 255), (21, 63, 63)),
-            Color::new('c', "red", (255, 85, 85), (63, 21, 21)),
-            Color::new('d', "light_purple", (255, 85, 255), (63, 21, 63)),
-            Color::new('e', "yellow", (255, 255, 85), (63, 63, 21)),
-            Color::new('f', "white", (255, 255, 255), (63, 63, 63)),
-        ];
-
-        colors
-            .binary_search_by_key(&code, |c| c.code)
-            .ok()
-            .and_then(|i| colors.get(i).cloned())
     }
 }
 
