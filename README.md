@@ -17,6 +17,8 @@ Contains a GUI application for interacting with the library.
 
 ## License
 
+crafty_novels is in no way affiliated with Pandoc, Minecraft, or Stendhal. All trademarks belong to their respective owners.
+
 crafty_novels is licensed under the GNU Affero General Public License version 3, or (at your option) any later version.
 You should have received a copy of the GNU Affero General Public License along with crafty_novels, found in [LICENSE](./LICENSE).
 If not, see \<[https://www.gnu.org/licenses/](https://www.gnu.org/licenses/)>.
