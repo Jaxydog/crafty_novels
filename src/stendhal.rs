@@ -28,19 +28,18 @@ struct Stendhal;
 
 impl Parser for Stendhal {
     fn parse_string_to_markdown(input: &str) -> Vec<&str> {
-        let mut md = vec![];
+        let mut md: Vec<&str> = vec![];
 
         for line in input.lines() {
             let mut lines = vec![];
 
-            // Replace page starts (`#-`) with thematic breaks `---`
-            let line = match line.strip_prefix(START_OF_PAGE) {
-                Some(first_line_of_page) => {
-                    lines.push(markdown::THEMATIC_BREAK);
-                    first_line_of_page
-                }
-                None => line,
-            };
+            let (thematic_break, line) = parse_start_of_page(line);
+
+            if let Some(thematic_break) = thematic_break {
+                lines.push(thematic_break);
+            }
+
+            todo!("parse for formatting in line");
 
             md.append(&mut lines);
         }
@@ -48,7 +47,17 @@ impl Parser for Stendhal {
         md
     }
 
+    #[allow(unused_variables)]
     fn parse_file_to_markdown<'l>(input: File) -> Vec<&'l str> {
         todo!()
+    }
+}
+
+/// If a string begins with `#- `, return a tuple holding a thematic break and the line with `#- `
+/// removed. Otherwise, return a tuple holding `None` and the line unmodified.
+fn parse_start_of_page(line: &str) -> (Option<&str>, &str) {
+    match line.strip_prefix(START_OF_PAGE) {
+        Some(first_line_of_page) => (Some(markdown::THEMATIC_BREAK), first_line_of_page),
+        None => (None, line),
     }
 }
