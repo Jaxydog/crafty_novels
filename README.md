@@ -1,7 +1,7 @@
 # crafty_novels
 
-A crate for parsing and converting text files using [Pandoc](https://pandoc.org/).
-Currently, the project is only designed to work with [Stendhal](https://modrinth.com/mod/stendhal) files.
+A crate for parsing and converting documents using [Pandoc](https://pandoc.org/).
+Currently, the project is only designed to work with [Stendhal](https://modrinth.com/mod/stendhal) book exports.
 
 ## Project
 
