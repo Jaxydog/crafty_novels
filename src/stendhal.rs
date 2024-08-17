@@ -17,47 +17,98 @@
 
 #![allow(dead_code)]
 
+use std::collections::HashSet;
 use std::fs::File;
 
+use crate::error::Error;
 use crate::markdown;
+use crate::minecraft;
 use crate::Parser;
 
 const START_OF_PAGE: &str = "#- ";
 
-struct Stendhal;
+#[derive(Debug)]
+pub enum Node {
+    Text(Box<str>),
+    /// A hidden node to control text formatting.
+    Format(minecraft::Format),
+    Space,
+    LineBreak,
+    ParagraphBreak,
+    /// A page break.
+    ThematicBreak,
+}
 
-impl Parser for Stendhal {
-    fn parse_string_to_markdown(input: &str) -> Vec<&str> {
-        let mut md: Vec<&str> = vec![];
+#[derive(Debug)]
+pub struct TextNode {
+    formatting: HashSet<minecraft::Format>,
+    text: Box<str>,
+}
+
+impl TextNode {
+    pub fn new(text: &str) -> Self {
+        Self {
+            formatting: HashSet::new(),
+            text: text.into(),
+        }
+    }
+
+    pub fn new_with_formatting(text: &str, formatting: HashSet<minecraft::Format>) -> Self {
+        Self {
+            formatting,
+            text: text.into(),
+        }
+    }
+}
+
+pub struct Stendhal;
+
+impl Stendhal {
+    pub fn parse_string(input: &str) -> Vec<Node> {
+        let mut md: Vec<Node> = vec![];
 
         for line in input.lines() {
-            let mut lines = vec![];
+            if line.is_empty() {
+                md.push(Node::ParagraphBreak);
+                continue;
+            }
 
             let (thematic_break, line) = parse_start_of_page(line);
 
-            if let Some(thematic_break) = thematic_break {
-                lines.push(thematic_break);
+            if thematic_break {
+                md.push(Node::ThematicBreak);
             }
 
-            todo!("parse for formatting in line");
+            // Maybe replace this with a stack-based implementation that flushes at spaces, format
+            // codes, and line endings?
+            for word in line.split(' ') {
+                if word.is_empty() {
+                    md.push(Node::Space);
+                } else {
+                    md.push(Node::Text(word.into()));
+                }
 
-            md.append(&mut lines);
+                md.push(Node::Space);
+            }
+            md.pop(); // Removing the trailing space
+
+            md.push(Node::LineBreak);
         }
 
-        md
+        dbg!(md)
     }
 
     #[allow(unused_variables)]
-    fn parse_file_to_markdown<'l>(input: File) -> Vec<&'l str> {
+    pub fn parse_file_to_markdown<'l>(input: File) -> Vec<&'l str> {
         todo!()
     }
 }
 
-/// If a string begins with `#- `, return a tuple holding a thematic break and the line with `#- `
-/// removed. Otherwise, return a tuple holding `None` and the line unmodified.
-fn parse_start_of_page(line: &str) -> (Option<&str>, &str) {
+/// If a string begins with `#- `, return a tuple holding a `bool` indicating if the prefix was
+/// stripped and the line with `#- ` removed.
+fn parse_start_of_page(line: &str) -> (bool, &str) {
     match line.strip_prefix(START_OF_PAGE) {
-        Some(first_line_of_page) => (Some(markdown::THEMATIC_BREAK), first_line_of_page),
-        None => (None, line),
+        Some(first_line_of_page) => (true, first_line_of_page),
+        None => (false, line),
     }
 }

@@ -20,7 +20,7 @@ use std::fs::File;
 mod error;
 mod markdown;
 mod minecraft;
-mod stendhal;
+pub mod stendhal;
 
 pub trait Parser {
     /// Parse a string of a certain format into a [CommonMark][1] Markdown file.

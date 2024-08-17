@@ -23,6 +23,7 @@ use std::{
 };
 
 /// Represents the ways that Minecraft Java Edition will format text.
+#[derive(Debug)]
 pub enum Format {
     Color(Color),
     /// AKA "Magical Text Source", characters should rapidly swap between a set of characters.
@@ -82,6 +83,7 @@ impl FromStr for Format {
     }
 }
 
+#[derive(Debug)]
 pub enum Color {
     Black,
     DarkBlue,
