@@ -41,28 +41,28 @@ impl TryFrom<FormatCode> for Format {
     /// Look up a [`code`][Self::code] against Minecraft Java Edition's list of formatting codes.
     fn try_from(code: FormatCode) -> Result<Self, Self::Error> {
         match code {
-            '0' => Ok(Format::Color(Color::Black)),
-            '1' => Ok(Format::Color(Color::DarkBlue)),
-            '2' => Ok(Format::Color(Color::DarkGreen)),
-            '3' => Ok(Format::Color(Color::DarkAqua)),
-            '4' => Ok(Format::Color(Color::DarkRed)),
-            '5' => Ok(Format::Color(Color::DarkPurple)),
-            '6' => Ok(Format::Color(Color::Gold)),
-            '7' => Ok(Format::Color(Color::Gray)),
-            '8' => Ok(Format::Color(Color::DarkGray)),
-            '9' => Ok(Format::Color(Color::Blue)),
-            'a' => Ok(Format::Color(Color::Green)),
-            'b' => Ok(Format::Color(Color::Aqua)),
-            'c' => Ok(Format::Color(Color::Red)),
-            'd' => Ok(Format::Color(Color::LightPurple)),
-            'e' => Ok(Format::Color(Color::Yellow)),
-            'f' => Ok(Format::Color(Color::White)),
-            'k' => Ok(Format::Obfuscated),
-            'l' => Ok(Format::Bold),
-            'm' => Ok(Format::Strikethrough),
-            'n' => Ok(Format::Underline),
-            'o' => Ok(Format::Italic),
-            'r' => Ok(Format::Reset),
+            '0' => Ok(Self::Color(Color::Black)),
+            '1' => Ok(Self::Color(Color::DarkBlue)),
+            '2' => Ok(Self::Color(Color::DarkGreen)),
+            '3' => Ok(Self::Color(Color::DarkAqua)),
+            '4' => Ok(Self::Color(Color::DarkRed)),
+            '5' => Ok(Self::Color(Color::DarkPurple)),
+            '6' => Ok(Self::Color(Color::Gold)),
+            '7' => Ok(Self::Color(Color::Gray)),
+            '8' => Ok(Self::Color(Color::DarkGray)),
+            '9' => Ok(Self::Color(Color::Blue)),
+            'a' => Ok(Self::Color(Color::Green)),
+            'b' => Ok(Self::Color(Color::Aqua)),
+            'c' => Ok(Self::Color(Color::Red)),
+            'd' => Ok(Self::Color(Color::LightPurple)),
+            'e' => Ok(Self::Color(Color::Yellow)),
+            'f' => Ok(Self::Color(Color::White)),
+            'k' => Ok(Self::Obfuscated),
+            'l' => Ok(Self::Bold),
+            'm' => Ok(Self::Strikethrough),
+            'n' => Ok(Self::Underline),
+            'o' => Ok(Self::Italic),
+            'r' => Ok(Self::Reset),
             code => Err(Error::NoSuchFormatCode(code)),
         }
     }
@@ -136,18 +136,11 @@ pub type FormatCode = char;
 
 /// Get the character following the `§` in a Minecraft format code.
 ///
-/// Expects a two byte string that starts with `§`.
+/// Expects a two character string that starts with `§`.
 ///
 /// Ex. The `0` in `§0`.
 pub fn get_code(str: &str) -> Option<FormatCode> {
-    Some(
-        str.bytes()
-            .skip(1) // Skip the `§`
-            .take(1) // Take the code
-            .collect::<Vec<u8>>()
-            .first()?
-            .to_owned() as FormatCode,
-    )
+    str.chars().nth(1) // Take the code, skipping the `§`.
 }
 
 /// Represents a color as it is used for text formatting in Minecraft.
@@ -173,10 +166,15 @@ pub struct ColorValue {
 
 impl ColorValue {
     /// Create a new instance of `Color`, doing type conversions where necessary.
-    pub fn new(code: FormatCode, name: &str, fg: (u8, u8, u8), bg: (u8, u8, u8)) -> Self {
+    pub fn new(
+        code: FormatCode,
+        name: impl AsRef<str>,
+        fg: (u8, u8, u8),
+        bg: (u8, u8, u8),
+    ) -> Self {
         Self {
             code,
-            name: name.to_string().into_boxed_str(),
+            name: name.as_ref().to_string().into_boxed_str(),
             fg: fg.into(),
             bg: bg.into(),
         }

@@ -34,7 +34,7 @@ impl AbstractSyntaxVecParser for Stendhal {
         let mut vec: Vec<Node> = vec![];
 
         for line in input.lines() {
-            vec.append(&mut parse_line(line)?);
+            parse_line(&mut vec, line)?;
         }
 
         Ok(vec)
@@ -48,18 +48,16 @@ impl AbstractSyntaxVecParser for Stendhal {
 }
 
 /// Parse a line in the Stendhal format into an abstract syntax vector.
-fn parse_line(line: &str) -> Result<Vec<Node>, Error> {
-    let mut vec = vec![];
-
+fn parse_line(output: &mut Vec<Node>, line: &str) -> Result<(), Error> {
     if line.is_empty() {
-        vec.push(Node::ParagraphBreak);
-        return Ok(vec);
+        output.push(Node::ParagraphBreak);
+        return Ok(());
     }
 
     let (thematic_break, line) = parse_start_of_page(line);
 
     if thematic_break {
-        vec.push(Node::ThematicBreak);
+        output.push(Node::ThematicBreak);
     }
 
     /// Flush the current word stack into a text node.
@@ -77,23 +75,23 @@ fn parse_line(line: &str) -> Result<Vec<Node>, Error> {
         match char {
             // Flush current word and insert a space
             ' ' => {
-                flush!(vec, word_stack);
-                vec.push(Node::Space)
+                flush!(output, word_stack);
+                output.push(Node::Space)
             }
             // Flush current word and insert new formatting code
             '§' => {
-                flush!(vec, word_stack);
+                flush!(output, word_stack);
                 let code = iter.next().ok_or(Error::MissingFormatCode)?;
-                vec.push(Node::Format(minecraft::Format::try_from(code)?))
+                output.push(Node::Format(minecraft::Format::try_from(code)?))
             }
             // Add a new character onto the current word
             _ => word_stack.push(char),
         }
     }
-    flush!(vec, word_stack);
-    vec.push(Node::LineBreak);
+    flush!(output, word_stack);
+    output.push(Node::LineBreak);
 
-    Ok(vec)
+    Ok(())
 }
 
 /// If a string begins with `#- `, return a tuple holding a `bool` indicating if the prefix was

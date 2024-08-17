@@ -15,6 +15,6 @@ pub enum Node {
 impl From<&mut Vec<char>> for Node {
     /// Drain a `Vec<char>` to build a text node.
     fn from(value: &mut Vec<char>) -> Self {
-        Self::Text(value.drain(0..).collect::<Box<str>>())
+        Self::Text(value.drain(..).collect::<Box<str>>())
     }
 }
