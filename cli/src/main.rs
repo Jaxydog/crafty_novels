@@ -16,14 +16,14 @@
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
 use crafty_novels::stendhal;
-use crafty_novels::AbstractSyntaxVecParser;
+use crafty_novels::LexicalTokenizer;
 
 fn main() {
     test_string_parsing();
 }
 
 fn test_string_parsing() {
-    let parse = stendhal::Stendhal::parse_string;
+    let parse = stendhal::Stendhal::tokenize_string;
 
     let input = r#"#- This is the start of the page
 First line
