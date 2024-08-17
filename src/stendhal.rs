@@ -17,91 +17,83 @@
 
 #![allow(dead_code)]
 
-use std::collections::HashSet;
 use std::fs::File;
 
 use crate::error::Error;
-use crate::markdown;
 use crate::minecraft;
-use crate::Parser;
+use crate::syntax::Node;
+use crate::AbstractSyntaxVecParser;
 
 const START_OF_PAGE: &str = "#- ";
 
-#[derive(Debug)]
-pub enum Node {
-    Text(Box<str>),
-    /// A hidden node to control text formatting.
-    Format(minecraft::Format),
-    Space,
-    LineBreak,
-    ParagraphBreak,
-    /// A page break.
-    ThematicBreak,
-}
-
-#[derive(Debug)]
-pub struct TextNode {
-    formatting: HashSet<minecraft::Format>,
-    text: Box<str>,
-}
-
-impl TextNode {
-    pub fn new(text: &str) -> Self {
-        Self {
-            formatting: HashSet::new(),
-            text: text.into(),
-        }
-    }
-
-    pub fn new_with_formatting(text: &str, formatting: HashSet<minecraft::Format>) -> Self {
-        Self {
-            formatting,
-            text: text.into(),
-        }
-    }
-}
-
 pub struct Stendhal;
 
-impl Stendhal {
-    pub fn parse_string(input: &str) -> Vec<Node> {
-        let mut md: Vec<Node> = vec![];
+impl AbstractSyntaxVecParser for Stendhal {
+    /// Parse a string in the Stendhal format into an abstract syntax vector.
+    fn parse_string(input: &str) -> Result<Vec<Node>, Error> {
+        let mut vec: Vec<Node> = vec![];
 
         for line in input.lines() {
-            if line.is_empty() {
-                md.push(Node::ParagraphBreak);
-                continue;
-            }
-
-            let (thematic_break, line) = parse_start_of_page(line);
-
-            if thematic_break {
-                md.push(Node::ThematicBreak);
-            }
-
-            // Maybe replace this with a stack-based implementation that flushes at spaces, format
-            // codes, and line endings?
-            for word in line.split(' ') {
-                if word.is_empty() {
-                    md.push(Node::Space);
-                } else {
-                    md.push(Node::Text(word.into()));
-                }
-
-                md.push(Node::Space);
-            }
-            md.pop(); // Removing the trailing space
-
-            md.push(Node::LineBreak);
+            vec.append(&mut parse_line(line)?);
         }
 
-        dbg!(md)
+        Ok(vec)
     }
 
+    /// Parse a file in the Stendhal format into an abstract syntax vector.
     #[allow(unused_variables)]
-    pub fn parse_file_to_markdown<'l>(input: File) -> Vec<&'l str> {
+    fn parse_file(input: File) -> Result<Vec<Node>, Error> {
         todo!()
     }
+}
+
+/// Parse a line in the Stendhal format into an abstract syntax vector.
+fn parse_line(line: &str) -> Result<Vec<Node>, Error> {
+    let mut vec = vec![];
+
+    if line.is_empty() {
+        vec.push(Node::ParagraphBreak);
+        return Ok(vec);
+    }
+
+    let (thematic_break, line) = parse_start_of_page(line);
+
+    if thematic_break {
+        vec.push(Node::ThematicBreak);
+    }
+
+    /// Flush the current word stack into a text node.
+    macro_rules! flush {
+        ($target:expr, $vec:expr) => {
+            if !$vec.is_empty() {
+                $target.push((&mut $vec).into());
+            }
+        };
+    }
+    let mut word_stack: Vec<char> = vec![];
+
+    let mut iter = line.chars();
+    while let Some(char) = iter.next() {
+        match char {
+            // Flush current word and insert a space
+            ' ' => {
+                flush!(vec, word_stack);
+                vec.push(Node::Space)
+            }
+            // Flush current word and insert new formatting code
+            '§' => {
+                flush!(vec, word_stack);
+                let code = iter.next().ok_or(Error::MissingFormatCode)?;
+                vec.push(Node::Format(minecraft::Format::try_from(code)?))
+            }
+            // Add a new character onto the current word
+            _ => word_stack.push(char),
+        }
+    }
+    flush!(vec, word_stack);
+    vec.push(Node::LineBreak);
+
+    Ok(vec)
 }
 
 /// If a string begins with `#- `, return a tuple holding a `bool` indicating if the prefix was

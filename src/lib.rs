@@ -21,8 +21,12 @@ mod error;
 mod markdown;
 mod minecraft;
 pub mod stendhal;
+mod syntax;
 
-pub trait Parser {
+use error::Error;
+use syntax::Node;
+
+pub trait MarkdownParser {
     /// Parse a string of a certain format into a [CommonMark][1] Markdown file.
     ///
     /// [1]: https://commonmark.org/
@@ -32,4 +36,11 @@ pub trait Parser {
     ///
     /// [1]: https://commonmark.org/
     fn parse_file_to_markdown<'l>(input: File) -> Vec<&'l str>;
+}
+
+pub trait AbstractSyntaxVecParser {
+    /// Parse a string into an abstract syntax vector.
+    fn parse_string(input: &str) -> Result<Vec<Node>, Error>;
+    /// Parse a file into an abstract syntax vector.
+    fn parse_file(input: File) -> Result<Vec<Node>, Error>;
 }

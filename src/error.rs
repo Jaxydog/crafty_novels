@@ -21,4 +21,6 @@ pub enum Error {
     InvalidFormatCodeString(String),
     #[error("no such format code '{0}'")]
     NoSuchFormatCode(char),
+    #[error("expected a format code after '§'")]
+    MissingFormatCode,
 }

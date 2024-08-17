@@ -16,6 +16,7 @@
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
 use crafty_novels::stendhal;
+use crafty_novels::AbstractSyntaxVecParser;
 
 fn main() {
     test_string_parsing();
@@ -37,5 +38,5 @@ Some §cRED line breaks
 Some §lBOLD line breaks (2)
    lots    of   spaces     "#;
 
-    parse(input);
+    dbg!(parse(input));
 }
