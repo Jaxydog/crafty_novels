@@ -23,4 +23,6 @@ pub enum Error {
     NoSuchFormatCode(char),
     #[error("expected a format code after '§'")]
     MissingFormatCode,
+    #[error("could not perform I/O action")]
+    Io(#[from] std::io::Error),
 }

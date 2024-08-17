@@ -1,7 +1,7 @@
 use crate::minecraft;
 
 #[derive(Debug)]
-pub enum Node {
+pub enum Token {
     Text(Box<str>),
     /// A hidden node to control text formatting.
     Format(minecraft::Format),
@@ -12,7 +12,7 @@ pub enum Node {
     ThematicBreak,
 }
 
-impl From<&mut Vec<char>> for Node {
+impl From<&mut Vec<char>> for Token {
     /// Drain a `Vec<char>` to build a text node.
     fn from(value: &mut Vec<char>) -> Self {
         Self::Text(value.drain(..).collect::<Box<str>>())

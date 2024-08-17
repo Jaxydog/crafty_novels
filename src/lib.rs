@@ -24,7 +24,7 @@ pub mod stendhal;
 mod syntax;
 
 use error::Error;
-use syntax::Node;
+use syntax::Token;
 
 pub trait MarkdownParser {
     /// Parse a string of a certain format into a [CommonMark][1] Markdown file.
@@ -38,9 +38,9 @@ pub trait MarkdownParser {
     fn parse_file_to_markdown<'l>(input: File) -> Vec<&'l str>;
 }
 
-pub trait AbstractSyntaxVecParser {
+pub trait LexicalTokenizer {
     /// Parse a string into an abstract syntax vector.
-    fn parse_string(input: &str) -> Result<Vec<Node>, Error>;
+    fn tokenize_string(input: &str) -> Result<Vec<Token>, Error>;
     /// Parse a file into an abstract syntax vector.
-    fn parse_file(input: File) -> Result<Vec<Node>, Error>;
+    fn tokenize_file(input: File) -> Result<Vec<Token>, Error>;
 }

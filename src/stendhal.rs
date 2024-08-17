@@ -18,20 +18,22 @@
 #![allow(dead_code)]
 
 use std::fs::File;
+use std::io::BufRead;
+use std::io::BufReader;
 
 use crate::error::Error;
 use crate::minecraft;
-use crate::syntax::Node;
-use crate::AbstractSyntaxVecParser;
+use crate::syntax::Token;
+use crate::LexicalTokenizer;
 
 const START_OF_PAGE: &str = "#- ";
 
 pub struct Stendhal;
 
-impl AbstractSyntaxVecParser for Stendhal {
+impl LexicalTokenizer for Stendhal {
     /// Parse a string in the Stendhal format into an abstract syntax vector.
-    fn parse_string(input: &str) -> Result<Vec<Node>, Error> {
-        let mut vec: Vec<Node> = vec![];
+    fn tokenize_string(input: &str) -> Result<Vec<Token>, Error> {
+        let mut vec: Vec<Token> = vec![];
 
         for line in input.lines() {
             parse_line(&mut vec, line)?;
@@ -41,23 +43,29 @@ impl AbstractSyntaxVecParser for Stendhal {
     }
 
     /// Parse a file in the Stendhal format into an abstract syntax vector.
-    #[allow(unused_variables)]
-    fn parse_file(input: File) -> Result<Vec<Node>, Error> {
-        todo!()
+    fn tokenize_file(input: File) -> Result<Vec<Token>, Error> {
+        let reader = BufReader::new(input);
+        let mut vec: Vec<Token> = vec![];
+
+        for line in reader.lines() {
+            parse_line(&mut vec, &line?)?;
+        }
+
+        Ok(vec)
     }
 }
 
 /// Parse a line in the Stendhal format into an abstract syntax vector.
-fn parse_line(output: &mut Vec<Node>, line: &str) -> Result<(), Error> {
+fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
     if line.is_empty() {
-        output.push(Node::ParagraphBreak);
+        output.push(Token::ParagraphBreak);
         return Ok(());
     }
 
     let (thematic_break, line) = parse_start_of_page(line);
 
     if thematic_break {
-        output.push(Node::ThematicBreak);
+        output.push(Token::ThematicBreak);
     }
 
     /// Flush the current word stack into a text node.
@@ -76,20 +84,20 @@ fn parse_line(output: &mut Vec<Node>, line: &str) -> Result<(), Error> {
             // Flush current word and insert a space
             ' ' => {
                 flush!(output, word_stack);
-                output.push(Node::Space)
+                output.push(Token::Space)
             }
             // Flush current word and insert new formatting code
             '§' => {
                 flush!(output, word_stack);
                 let code = iter.next().ok_or(Error::MissingFormatCode)?;
-                output.push(Node::Format(minecraft::Format::try_from(code)?))
+                output.push(Token::Format(minecraft::Format::try_from(code)?))
             }
             // Add a new character onto the current word
             _ => word_stack.push(char),
         }
     }
     flush!(output, word_stack);
-    output.push(Node::LineBreak);
+    output.push(Token::LineBreak);
 
     Ok(())
 }
