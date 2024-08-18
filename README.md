@@ -1,7 +1,8 @@
 # crafty_novels
 
 A crate for parsing and converting documents using [Pandoc](https://pandoc.org/).
-Currently, the project is only designed to work with [Stendhal](https://modrinth.com/mod/stendhal) book exports.
+Currently, the project is only designed to work with [Stendhal](https://modrinth.com/mod/stendhal) book exports,
+and only exports to HTML. It does not yet utilize Pandoc.
 
 ## Project
 
