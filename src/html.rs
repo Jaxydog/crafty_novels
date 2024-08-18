@@ -15,14 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-use std::fmt::{Display, Write};
-
-use crate::{error::Error, syntax::Token, Export};
-
-// Fixes `concat(str, text.to_string()).as_ref().to_string()`
-macro_rules! concat {
-    () => {};
-}
+use crate::{error::Error, minecraft::Format, syntax::Token, Export};
+use std::fmt::Write;
 
 struct Html {}
 
@@ -31,12 +25,12 @@ impl Export for Html {
     fn export_token_vector_to_string(tokens: Vec<Token>) -> Result<Box<str>, Error> {
         let mut str: String = String::new();
 
-        //        let mut line_format_stack: Vec<_> = vec![];
+        let mut format_token_stack: Vec<Format> = vec![];
         for token in tokens {
             match token {
-                Token::Text(text) => str = concat(str, text.to_string()).as_ref().to_string(),
-                Token::Format(_) => todo!(),
-                Token::Space => todo!(),
+                Token::Text(s) => str.push_str(&s),
+                Token::Format(f) => handle_format(&mut str, &mut format_token_stack, f)?,
+                Token::Space => str.push(' '),
                 Token::LineBreak => todo!(),
                 Token::ParagraphBreak => todo!(),
                 Token::ThematicBreak => todo!(),
@@ -53,10 +47,84 @@ impl Export for Html {
     }
 }
 
-fn concat<D: Display>(a: D, b: D) -> impl AsRef<str> {
-    let mut out = String::new();
+fn handle_format(
+    str: &mut String,
+    format_token_stack: &mut Vec<Format>,
+    format_token: Format,
+) -> Result<(), Error> {
+    /// Generates a match statement with `Format` variants to write the given HTML into `str`.
+    ///
+    /// # When opening HTML tags
+    ///
+    /// - Provide `$color_var` (to use it inside `$color_html`).
+    /// - Provide `$format_token_stack` (to push `$format_token` into it).
+    macro_rules! write_html {
+        // Opening HTML tags
+        (
+            $str:expr, $format_token_stack:expr, $format_token:expr;
+            Color($color_var:ident) => $color_html:expr;
+            $( $format:ident => $html:expr ),+ ;
+            Reset => $reset_fn:expr;
+        ) => {
+            match $format_token {
+                Format::Color($color_var) => {
+                    $format_token_stack.push($format_token);
+                    write!($str, $color_html)?;
+                }
+                $(
+                    Format::$format => {
+                        $format_token_stack.push($format_token);
+                        write!($str, $html)?;
+                    }
+                ),+ ,
+                Format::Reset => $reset_fn,
+            }
+        };
 
-    write!(out, "{a}{b}").expect("writing to a string should not fail");
+        // Closing HTML tags
+        (
+            $str:expr, $format_token:expr;
+            Color => $color_html:expr;
+            $( $format:ident => $html:expr ),+ ;
+            Reset => $reset_fn:expr;
+        ) => {
+            match $format_token {
+                Format::Color(_) => write!($str, $color_html)?,
+                $(
+                    Format::$format => write!($str, $html)?
+                ),+ ,
+                Format::Reset => $reset_fn,
+            }
+        };
+    }
 
-    out
+    fn handle_reset(str: &mut String, format_token_stack: &mut Vec<Format>) -> Result<(), Error> {
+        while let Some(format_token) = format_token_stack.pop() {
+            write_html!(
+                str, format_token;
+                Color => "</span>";
+                Obfuscated => "</code>",
+                Bold => "</b>",
+                Strikethrough => "</s>",
+                Underline => "</u>",
+                Italic => "</i>";
+                Reset => unreachable!();
+            );
+        }
+
+        Ok(())
+    }
+
+    write_html!(
+        str, format_token_stack, format_token;
+        Color(c) => "<span style='color:{c}'>";
+        Obfuscated => "<code>",
+        Bold => "<b>",
+        Strikethrough => "<s>",
+        Underline => "<u>",
+        Italic => "<i>";
+        Reset => handle_reset(str, format_token_stack)?;
+    );
+
+    Ok(())
 }

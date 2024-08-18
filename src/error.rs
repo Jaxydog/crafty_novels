@@ -25,4 +25,6 @@ pub enum Error {
     MissingFormatCode,
     #[error("could not perform I/O action")]
     Io(#[from] std::io::Error),
+    #[error("could not format item")]
+    Fmt(#[from] std::fmt::Error),
 }

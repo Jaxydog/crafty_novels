@@ -23,7 +23,7 @@ use std::{
 };
 
 /// Represents the ways that Minecraft Java Edition will format text.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum Format {
     Color(Color),
     /// AKA "Magical Text Source", characters should rapidly swap between a set of characters.
@@ -45,8 +45,8 @@ impl TryFrom<FormatCode> for Format {
         /// Codes that match `Self::Color` are separated from other `Self` variants by a semicolon.
         macro_rules! match_code {
             (
-                 $( $color_code:expr => $color:ident ),+ ;
-                 $( $format_code:expr => $format:ident ),+ ;
+                $( $color_code:expr => $color:ident ),+ ;
+                $( $format_code:expr => $format:ident ),+ ;
             ) => {
                 match code {
                     $( $color_code => Ok(Self::Color(Color::$color)) ),+,
@@ -98,7 +98,7 @@ impl FromStr for Format {
     }
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum Color {
     Black,
     DarkBlue,
@@ -230,5 +230,11 @@ impl UpperHex for ColorTuple {
 impl From<(u8, u8, u8)> for ColorTuple {
     fn from(value: (u8, u8, u8)) -> Self {
         Self(value.0, value.1, value.2)
+    }
+}
+
+impl Display for Color {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", ColorValue::from(*self).fg)
     }
 }
