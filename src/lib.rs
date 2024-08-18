@@ -18,7 +18,6 @@
 use std::fs::File;
 
 mod error;
-mod markdown;
 mod minecraft;
 pub mod stendhal;
 mod syntax;
