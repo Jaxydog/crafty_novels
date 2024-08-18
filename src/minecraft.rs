@@ -99,7 +99,7 @@ impl TryFrom<FormatCode> for Format {
         ///
         /// Codes that match `Self::Color` are separated from other `Self` variants by a semicolon.
         macro_rules! match_code {
-(
+            (
                 $( $color_code:expr => $color:ident ),+ ;
                 $( $format_code:expr => $format:ident ),+ ;
             ) => {
