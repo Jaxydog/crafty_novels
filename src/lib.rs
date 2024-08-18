@@ -18,6 +18,7 @@
 use std::fs::File;
 
 mod error;
+mod html;
 mod minecraft;
 pub mod stendhal;
 mod syntax;
@@ -25,16 +26,11 @@ mod syntax;
 use error::Error;
 use syntax::Token;
 
-pub trait MarkdownParser {
-    /// Parse a string of a certain format into a [CommonMark][1] Markdown file.
-    ///
-    /// [1]: https://commonmark.org/
-    fn parse_string_to_markdown(input: &str) -> Vec<&str>;
-
-    /// Parse a file of a certain format into a [CommonMark][1] Markdown file.
-    ///
-    /// [1]: https://commonmark.org/
-    fn parse_file_to_markdown<'l>(input: File) -> Vec<&'l str>;
+pub trait Export {
+    /// Parse a given abstract syntax vector into a certain format, then output that as a string.
+    fn export_token_vector_to_string(tokens: Vec<Token>) -> Result<Box<str>, Error>;
+    /// Parse a given abstract syntax vector into a certain format, then output that as a file.
+    fn export_token_vector_to_file(tokens: Vec<Token>, output: File) -> Result<(), Error>;
 }
 
 pub trait LexicalTokenizer {
