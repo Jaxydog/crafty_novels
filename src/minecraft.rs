@@ -46,7 +46,7 @@ impl TryFrom<FormatCode> for Format {
         macro_rules! match_code {
             (
                  $( $color_code:expr => $color:ident ),+ ;
-                 $( $format_code:expr => $format:ident ),+ $(,)?
+                 $( $format_code:expr => $format:ident ),+ ;
             ) => {
                 match code {
                     $( $color_code => Ok(Self::Color(Color::$color)) ),+,
@@ -78,7 +78,7 @@ impl TryFrom<FormatCode> for Format {
             'm' => Strikethrough,
             'n' => Underline,
             'o' => Italic,
-            'r' => Reset,
+            'r' => Reset;
         )
     }
 }
@@ -125,7 +125,7 @@ impl From<Color> for ColorValue {
         macro_rules! color_match {
             ( $(
                 $color:ident => $code:expr, $name:expr, $fg:expr, $bg:expr
-            );+  $(;)? ) => {
+            );+ ; ) => {
                 match color {$(
                     Color::$color => ColorValue::new($code, $name, $fg, $bg)
                 ),+}
@@ -133,22 +133,22 @@ impl From<Color> for ColorValue {
         }
 
         color_match!(
-            Black       => '0', "black",        (0,   0,   0  ),  (0,  0,  0 );
-            DarkBlue    => '1', "dark_blue",    (0,   0,   170),  (0,  0,  42);
-            DarkGreen   => '2', "dark_green",   (0,   170, 0  ),  (0,  42, 0 );
-            DarkAqua    => '3', "dark_aqua",    (0,   170, 170),  (0,  42, 42);
-            DarkRed     => '4', "dark_red",     (170, 0,   0  ),  (42, 0,  0 );
-            DarkPurple  => '5', "dark_purple",  (170, 0,   170),  (42, 0,  42);
-            Gold        => '6', "gold",         (255, 170, 0  ),  (42, 42, 0 );
-            Gray        => '7', "gray",         (170, 170, 170),  (42, 42, 42);
-            DarkGray    => '8', "dark_gray",    (85,  85,  85 ),  (21, 21, 21);
-            Blue        => '9', "blue",         (85,  85,  255),  (21, 21, 63);
-            Green       => 'a', "green",        (85,  255, 85 ),  (21, 63, 21);
-            Aqua        => 'b', "aqua",         (85,  255, 255),  (21, 63, 63);
-            Red         => 'c', "red",          (255, 85,  85 ),  (63, 21, 21);
-            LightPurple => 'd', "light_purple", (255, 85,  255),  (63, 21, 63);
-            Yellow      => 'e', "yellow",       (255, 255, 85 ),  (63, 63, 21);
-            White       => 'f', "white",        (255, 255, 255),  (63, 63, 63);
+            Black       => '0', "black",        (0,   0,   0  ), (0,  0,  0 );
+            DarkBlue    => '1', "dark_blue",    (0,   0,   170), (0,  0,  42);
+            DarkGreen   => '2', "dark_green",   (0,   170, 0  ), (0,  42, 0 );
+            DarkAqua    => '3', "dark_aqua",    (0,   170, 170), (0,  42, 42);
+            DarkRed     => '4', "dark_red",     (170, 0,   0  ), (42, 0,  0 );
+            DarkPurple  => '5', "dark_purple",  (170, 0,   170), (42, 0,  42);
+            Gold        => '6', "gold",         (255, 170, 0  ), (42, 42, 0 );
+            Gray        => '7', "gray",         (170, 170, 170), (42, 42, 42);
+            DarkGray    => '8', "dark_gray",    (85,  85,  85 ), (21, 21, 21);
+            Blue        => '9', "blue",         (85,  85,  255), (21, 21, 63);
+            Green       => 'a', "green",        (85,  255, 85 ), (21, 63, 21);
+            Aqua        => 'b', "aqua",         (85,  255, 255), (21, 63, 63);
+            Red         => 'c', "red",          (255, 85,  85 ), (63, 21, 21);
+            LightPurple => 'd', "light_purple", (255, 85,  255), (63, 21, 63);
+            Yellow      => 'e', "yellow",       (255, 255, 85 ), (63, 63, 21);
+            White       => 'f', "white",        (255, 255, 255), (63, 63, 63);
         )
     }
 }
