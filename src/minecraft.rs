@@ -35,6 +35,53 @@ pub enum Format {
     Reset,
 }
 
+impl Format {
+    /// Returns this format's associated [`FormatCode`].
+    ///
+    /// Look up a [`code`][Self::code] against Minecraft Java Edition's list of formatting codes.
+    pub const fn code(self) -> FormatCode {
+        /// Match the input `Self` to a `FormatCode` Value.
+        ///
+        /// Codes that match `Self::Color` are separated from other `Self` variants by a semicolon.
+        macro_rules! match_format {
+            (
+                $( $color:ident => $color_code:literal ),+ ;
+                $( $variant:ident => $format_code:literal ),+ ;
+            ) => {
+                match self {
+                    $( Self::Color(Color::$color) => FormatCode::new($color_code), )+
+                    $( Self::$variant => FormatCode::new($format_code), )+
+                }
+            };
+        }
+
+        match_format! {
+            Black => '0',
+            DarkBlue => '1',
+            DarkGreen => '2',
+            DarkAqua => '3',
+            DarkRed => '4',
+            DarkPurple => '5',
+            Gold => '6',
+            Gray => '7',
+            DarkGray => '8',
+            Blue => '9',
+            Green => 'a',
+            Aqua => 'b',
+            Red => 'c',
+            LightPurple => 'd',
+            Yellow => 'e',
+            White => 'f';
+            Obfuscated => 'k',
+            Bold => 'l',
+            Strikethrough => 'm',
+            Underline => 'n',
+            Italic => 'o',
+            Reset => 'r';
+        }
+    }
+}
+
 impl TryFrom<char> for Format {
     type Error = Error;
 
@@ -52,7 +99,7 @@ impl TryFrom<FormatCode> for Format {
         ///
         /// Codes that match `Self::Color` are separated from other `Self` variants by a semicolon.
         macro_rules! match_code {
-            (
+(
                 $( $color_code:expr => $color:ident ),+ ;
                 $( $format_code:expr => $format:ident ),+ ;
             ) => {
@@ -177,6 +224,12 @@ impl FormatCode {
     /// Returns the inner character.
     pub const fn get(self) -> char {
         self.0
+    }
+}
+
+impl From<Format> for FormatCode {
+    fn from(value: Format) -> Self {
+        value.code()
     }
 }
 
