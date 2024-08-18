@@ -35,6 +35,14 @@ pub enum Format {
     Reset,
 }
 
+impl TryFrom<char> for Format {
+    type Error = Error;
+
+    fn try_from(value: char) -> Result<Self, Self::Error> {
+        <Self as TryFrom<FormatCode>>::try_from(FormatCode::new(value))
+    }
+}
+
 impl TryFrom<FormatCode> for Format {
     type Error = Error;
 
@@ -48,7 +56,7 @@ impl TryFrom<FormatCode> for Format {
                 $( $color_code:expr => $color:ident ),+ ;
                 $( $format_code:expr => $format:ident ),+ ;
             ) => {
-                match code {
+                match code.get() {
                     $( $color_code => Ok(Self::Color(Color::$color)) ),+,
                     $( $format_code => Ok(Self::$format) ),+,
                     code => Err(Error::NoSuchFormatCode(code)),
@@ -127,7 +135,7 @@ impl From<Color> for ColorValue {
                 $color:ident => $code:expr, $name:expr, $fg:expr, $bg:expr
             );+ ; ) => {
                 match color {$(
-                    Color::$color => ColorValue::new($code, $name, $fg, $bg)
+                    Color::$color => ColorValue::new($code.into(), $name, $fg, $bg)
                 ),+}
             };
         }
@@ -156,7 +164,33 @@ impl From<Color> for ColorValue {
 /// The character following the § in the code assocated with a format code.
 ///
 /// Ex. The `0` in `§0`.
-pub type FormatCode = char;
+#[repr(transparent)]
+#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub struct FormatCode(char);
+
+impl FormatCode {
+    /// Creates a new [`FormatCode`].
+    pub const fn new(code: char) -> Self {
+        Self(code)
+    }
+
+    /// Returns the inner character.
+    pub const fn get(self) -> char {
+        self.0
+    }
+}
+
+impl From<char> for FormatCode {
+    fn from(value: char) -> Self {
+        Self(value)
+    }
+}
+
+impl Display for FormatCode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        <char as Display>::fmt(&self.0, f)
+    }
+}
 
 /// Get the character following the `§` in a Minecraft format code.
 ///
@@ -164,7 +198,7 @@ pub type FormatCode = char;
 ///
 /// Ex. The `0` in `§0`.
 pub fn get_code(str: &str) -> Option<FormatCode> {
-    str.chars().nth(1) // Take the code, skipping the `§`.
+    str.chars().nth(1).map(FormatCode) // Take the code, skipping the `§`.
 }
 
 /// Represents a color as it is used for text formatting in Minecraft.
