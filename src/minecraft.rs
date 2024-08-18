@@ -56,10 +56,10 @@ impl TryFrom<FormatCode> for Format {
                 $( $color_code:expr => $color:ident ),+ ;
                 $( $format_code:expr => $format:ident ),+ ;
             ) => {
-                match code.get() {
-                    $( $color_code => Ok(Self::Color(Color::$color)) ),+,
-                    $( $format_code => Ok(Self::$format) ),+,
-                    code => Err(Error::NoSuchFormatCode(code)),
+                match code {
+                    $( FormatCode($color_code) => Ok(Self::Color(Color::$color)) ),+,
+                    $( FormatCode($format_code) => Ok(Self::$format) ),+,
+                    FormatCode(code) => Err(Error::NoSuchFormatCode(code)),
                 }
             };
         }
@@ -135,7 +135,7 @@ impl From<Color> for ColorValue {
                 $color:ident => $code:expr, $name:expr, $fg:expr, $bg:expr
             );+ ; ) => {
                 match color {$(
-                    Color::$color => ColorValue::new($code.into(), $name, $fg, $bg)
+                    Color::$color => ColorValue::new(FormatCode::new($code), $name, $fg, $bg)
                 ),+}
             };
         }
