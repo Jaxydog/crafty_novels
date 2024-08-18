@@ -147,9 +147,7 @@ impl FromStr for Format {
     ///
     /// Ex. The `0` in `§0`.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let code = get_code(s).ok_or(Error::InvalidFormatCodeString(s.to_string()))?;
-
-        Self::try_from(code)
+        Self::try_from(FormatCode::from_str(s)?)
     }
 }
 
@@ -239,19 +237,25 @@ impl From<char> for FormatCode {
     }
 }
 
+impl FromStr for FormatCode {
+    type Err = Error;
+
+    fn from_str(string: &str) -> Result<Self, Self::Err> {
+        if !(string.starts_with('§') && string.chars().count() == 2) {
+            return Err(Error::InvalidFormatCodeString(string.to_string()));
+        }
+
+        string.chars().nth(1).map(Self::new).ok_or_else(|| {
+            // Panic: We just asserted that `string` contains exactly 2 characters.
+            unreachable!("the input string should always contain two characters")
+        })
+    }
+}
+
 impl Display for FormatCode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "§{}", self.get())
     }
-}
-
-/// Get the character following the `§` in a Minecraft format code.
-///
-/// Expects a two character string that starts with `§`.
-///
-/// Ex. The `0` in `§0`.
-pub fn get_code(str: &str) -> Option<FormatCode> {
-    str.chars().nth(1).map(FormatCode) // Take the code, skipping the `§`.
 }
 
 /// Represents a color as it is used for text formatting in Minecraft.
