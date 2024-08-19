@@ -35,6 +35,61 @@ pub enum Format {
     Reset,
 }
 
+impl Format {
+    /// Returns this format's associated [`FormatCode`].
+    ///
+    /// Look up a [`code`][Self::code] against Minecraft Java Edition's list of formatting codes.
+    pub const fn code(self) -> FormatCode {
+        /// Match the input `Self` to a `FormatCode` Value.
+        ///
+        /// Codes that match `Self::Color` are separated from other `Self` variants by a semicolon.
+        macro_rules! match_format {
+            (
+                $( $color:ident => $color_code:literal ),+ ;
+                $( $variant:ident => $format_code:literal ),+ ;
+            ) => {
+                match self {
+                    $( Self::Color(Color::$color) => FormatCode::new($color_code), )+
+                    $( Self::$variant => FormatCode::new($format_code), )+
+                }
+            };
+        }
+
+        match_format! {
+            Black => '0',
+            DarkBlue => '1',
+            DarkGreen => '2',
+            DarkAqua => '3',
+            DarkRed => '4',
+            DarkPurple => '5',
+            Gold => '6',
+            Gray => '7',
+            DarkGray => '8',
+            Blue => '9',
+            Green => 'a',
+            Aqua => 'b',
+            Red => 'c',
+            LightPurple => 'd',
+            Yellow => 'e',
+            White => 'f';
+            Obfuscated => 'k',
+            Bold => 'l',
+            Strikethrough => 'm',
+            Underline => 'n',
+            Italic => 'o',
+            Reset => 'r';
+        }
+    }
+}
+
+impl TryFrom<char> for Format {
+    type Error = Error;
+
+    fn try_from(value: char) -> Result<Self, Self::Error> {
+        <Self as TryFrom<FormatCode>>::try_from(FormatCode::new(value))
+    }
+}
+
 impl TryFrom<FormatCode> for Format {
     type Error = Error;
 
@@ -49,9 +104,9 @@ impl TryFrom<FormatCode> for Format {
                 $( $format_code:expr => $format:ident ),+ ;
             ) => {
                 match code {
-                    $( $color_code => Ok(Self::Color(Color::$color)) ),+,
-                    $( $format_code => Ok(Self::$format) ),+,
-                    code => Err(Error::NoSuchFormatCode(code)),
+                    $( FormatCode($color_code) => Ok(Self::Color(Color::$color)) ),+,
+                    $( FormatCode($format_code) => Ok(Self::$format) ),+,
+                    FormatCode(code) => Err(Error::NoSuchFormatCode(code)),
                 }
             };
         }
@@ -92,9 +147,7 @@ impl FromStr for Format {
     ///
     /// Ex. The `0` in `§0`.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let code = get_code(s).ok_or(Error::InvalidFormatCodeString(s.to_string()))?;
-
-        Self::try_from(code)
+        Self::try_from(FormatCode::from_str(s)?)
     }
 }
 
@@ -127,7 +180,7 @@ impl From<Color> for ColorValue {
                 $color:ident => $code:expr, $name:expr, $fg:expr, $bg:expr
             );+ ; ) => {
                 match color {$(
-                    Color::$color => ColorValue::new($code, $name, $fg, $bg)
+                    Color::$color => ColorValue::new(FormatCode::new($code), $name, $fg, $bg)
                 ),+}
             };
         }
@@ -156,15 +209,53 @@ impl From<Color> for ColorValue {
 /// The character following the § in the code assocated with a format code.
 ///
 /// Ex. The `0` in `§0`.
-pub type FormatCode = char;
+#[repr(transparent)]
+#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub struct FormatCode(char);
 
-/// Get the character following the `§` in a Minecraft format code.
-///
-/// Expects a two character string that starts with `§`.
-///
-/// Ex. The `0` in `§0`.
-pub fn get_code(str: &str) -> Option<FormatCode> {
-    str.chars().nth(1) // Take the code, skipping the `§`.
+impl FormatCode {
+    /// Creates a new [`FormatCode`].
+    pub const fn new(code: char) -> Self {
+        Self(code)
+    }
+
+    /// Returns the inner character.
+    pub const fn get(self) -> char {
+        self.0
+    }
+}
+
+impl From<Format> for FormatCode {
+    fn from(value: Format) -> Self {
+        value.code()
+    }
+}
+
+impl From<char> for FormatCode {
+    fn from(value: char) -> Self {
+        Self(value)
+    }
+}
+
+impl FromStr for FormatCode {
+    type Err = Error;
+
+    fn from_str(string: &str) -> Result<Self, Self::Err> {
+        if !(string.starts_with('§') && string.chars().count() == 2) {
+            return Err(Error::InvalidFormatCodeString(string.to_string()));
+        }
+
+        string.chars().nth(1).map(Self::new).ok_or_else(|| {
+            // Panic: We just asserted that `string` contains exactly 2 characters.
+            unreachable!("the input string should always contain two characters")
+        })
+    }
+}
+
+impl Display for FormatCode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "§{}", self.get())
+    }
 }
 
 /// Represents a color as it is used for text formatting in Minecraft.
