@@ -210,7 +210,7 @@ impl From<Color> for ColorValue {
 ///
 /// Ex. The `0` in `§0`.
 #[repr(transparent)]
-#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FormatCode(char);
 
 impl FormatCode {

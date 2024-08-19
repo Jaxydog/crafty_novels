@@ -18,7 +18,7 @@
 use std::fs::File;
 
 mod error;
-mod html;
+pub mod html;
 mod minecraft;
 pub mod stendhal;
 mod syntax;

@@ -18,7 +18,7 @@
 use crate::{error::Error, minecraft::Format, syntax::Token, Export};
 use std::fmt::Write;
 
-struct Html {}
+pub struct Html {}
 
 impl Export for Html {
     /// Parse a given abstract syntax vector into HTML, then output that as a string.
@@ -30,10 +30,14 @@ impl Export for Html {
             match token {
                 Token::Text(s) => str.push_str(&s),
                 Token::Format(f) => handle_format(&mut str, &mut format_token_stack, f)?,
-                Token::Space => str.push(' '),
-                Token::LineBreak => todo!(),
-                Token::ParagraphBreak => todo!(),
-                Token::ThematicBreak => todo!(),
+                Token::Space => add_space(&mut str),
+                Token::LineBreak => {
+                    // Maybe the tokenizer should insert a reset at every line break instead?
+                    close_formatting_tags(&mut str, &mut format_token_stack)?;
+                    str.push_str("<br />")
+                }
+                Token::ParagraphBreak => str.push_str("<br />"),
+                Token::ThematicBreak => str.push_str("<hr />"),
             }
         }
 
@@ -47,19 +51,32 @@ impl Export for Html {
     }
 }
 
+/// Add a space character in a syntax-aware manner
+///
+/// If the last character was a space, then it adds "&nbsp;" but ' ' otherwise.
+fn add_space(str: &mut String) {
+    if str.is_empty() || str.ends_with(' ') {
+        str.push_str("&nbsp;");
+    } else {
+        str.push(' ');
+    }
+}
+
+/// Push the `str` the appropriate HTML element for `format_token`.
+/// Pushes the `format_token` onto `format_token_stack`.
+///
+/// If it hits [`Format::Reset`], it will call [`close_formatting_tags`].
 fn handle_format(
     str: &mut String,
     format_token_stack: &mut Vec<Format>,
     format_token: Format,
 ) -> Result<(), Error> {
-    /// Generates a match statement with `Format` variants to write the given HTML into `str`.
-    ///
-    /// # When opening HTML tags
+    /// Generates a match statement with `Format` variants to write the given HTML (containing
+    /// opening tags) into `str`.
     ///
     /// - Provide `$color_var` (to use it inside `$color_html`).
     /// - Provide `$format_token_stack` (to push `$format_token` into it).
-    macro_rules! write_html {
-        // Opening HTML tags
+    macro_rules! open_html {
         (
             $str:expr, $format_token_stack:expr, $format_token:expr;
             Color($color_var:ident) => $color_html:expr;
@@ -81,7 +98,28 @@ fn handle_format(
             }
         };
 
-        // Closing HTML tags
+    }
+
+    open_html!(
+        str, format_token_stack, format_token;
+        Color(c) => "<span style='color:{c}'>";
+        Obfuscated => "<code>",
+        Bold => "<b>",
+        Strikethrough => "<s>",
+        Underline => "<u>",
+        Italic => "<i>";
+        Reset => close_formatting_tags(str, format_token_stack)?;
+    );
+
+    Ok(())
+}
+
+/// Closes all the HTML elements opened in [`handle_format`] by the tokens in `format_token_stack`.
+fn close_formatting_tags(
+    str: &mut String,
+    format_token_stack: &mut Vec<Format>,
+) -> Result<(), Error> {
+    macro_rules! close_html {
         (
             $str:expr, $format_token:expr;
             Color => $color_html:expr;
@@ -98,33 +136,18 @@ fn handle_format(
         };
     }
 
-    fn handle_reset(str: &mut String, format_token_stack: &mut Vec<Format>) -> Result<(), Error> {
-        while let Some(format_token) = format_token_stack.pop() {
-            write_html!(
-                str, format_token;
-                Color => "</span>";
-                Obfuscated => "</code>",
-                Bold => "</b>",
-                Strikethrough => "</s>",
-                Underline => "</u>",
-                Italic => "</i>";
-                Reset => unreachable!();
-            );
-        }
-
-        Ok(())
+    while let Some(format_token) = format_token_stack.pop() {
+        close_html!(
+            str, format_token;
+            Color => "</span>";
+            Obfuscated => "</code>",
+            Bold => "</b>",
+            Strikethrough => "</s>",
+            Underline => "</u>",
+            Italic => "</i>";
+            Reset => unreachable!();
+        );
     }
-
-    write_html!(
-        str, format_token_stack, format_token;
-        Color(c) => "<span style='color:{c}'>";
-        Obfuscated => "<code>",
-        Bold => "<b>",
-        Strikethrough => "<s>",
-        Underline => "<u>",
-        Italic => "<i>";
-        Reset => handle_reset(str, format_token_stack)?;
-    );
 
     Ok(())
 }

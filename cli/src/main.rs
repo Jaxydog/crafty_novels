@@ -15,7 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+use crafty_novels::html::Html;
 use crafty_novels::stendhal;
+use crafty_novels::Export;
 use crafty_novels::LexicalTokenizer;
 
 fn main() {
@@ -23,8 +25,6 @@ fn main() {
 }
 
 fn test_string_parsing() {
-    let parse = stendhal::Stendhal::tokenize_string;
-
     let input = r#"#- This is the start of the page
 First line
 #- New Page
@@ -38,5 +38,8 @@ Some §cRED line breaks
 Some §lBOLD line breaks (2)
    lots    of   spaces     "#;
 
-    dbg!(parse(input));
+    let tokens = stendhal::Stendhal::tokenize_string(input).unwrap();
+    let html = Html::export_token_vector_to_string(tokens).unwrap();
+
+    print!("{}", html);
 }
