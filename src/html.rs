@@ -22,47 +22,66 @@ pub struct Html {}
 
 impl Export for Html {
     /// Parse a given abstract syntax vector into HTML, then output that as a string.
+    ///
+    /// # Security
+    ///
+    /// This function makes no attempt to santize input. [`Token::Text`] can carry arbitrary HTML,
+    /// which creates an obvious opening for XSS attacks. Handle output with care.
+    ///
+    /// I should be converting <> to &lt;&gt; anyways. Does that nullify XSS? Are there any other
+    /// characters I need to check out? How do I handle & characters?
     fn export_token_vector_to_string(tokens: Vec<Token>) -> Result<Box<str>, Error> {
         let mut str: String = String::new();
 
+        // Most readable
+        str.push_str("<article style=white-space:break-spaces>");
+
+        // Most accurate
+        // Does, however, still consume spaces that break, which Minecraft books do not
+        // str.push_str("<article style=line-break:anywhere>");
+
         let mut format_token_stack: Vec<Format> = vec![];
         for token in tokens {
-            match token {
-                Token::Text(s) => str.push_str(&s),
-                Token::Format(f) => handle_format(&mut str, &mut format_token_stack, f)?,
-                Token::Space => add_space(&mut str),
-                Token::LineBreak => {
-                    // Maybe the tokenizer should insert a reset at every line break instead?
-                    close_formatting_tags(&mut str, &mut format_token_stack)?;
-                    str.push_str("<br />")
-                }
-                Token::ParagraphBreak => str.push_str("<br />"),
-                Token::ThematicBreak => str.push_str("<hr />"),
-            }
+            handle_token(&mut str, &mut format_token_stack, &token)?;
         }
+
+        str.push_str("</article>");
 
         Ok(str.into_boxed_str())
     }
 
     /// Parse a given abstract syntax vector into HTML, then output that as a file.
+    ///
+    /// # Security
+    ///
+    /// This function makes no attempt to santize input. [`Token::Text`] can carry arbitrary HTML,
+    /// which creates an obvious opening for XSS attacks. Handle output with care.
     #[allow(unused_variables)]
     fn export_token_vector_to_file(vec: Vec<Token>, output: std::fs::File) -> Result<(), Error> {
         todo!()
     }
 }
 
-/// Add a space character in a syntax-aware manner
-///
-/// If the last character was a space, then it adds "&nbsp;" but ' ' otherwise.
-fn add_space(str: &mut String) {
-    if str.is_empty() || str.ends_with(' ') {
-        str.push_str("&nbsp;");
-    } else {
-        str.push(' ');
-    }
+/// Push the appropriate HTML element(s) for `token` into `str`.
+/// If `token` is [`Token::Format`], it is pushed onto `format_token_stack`.
+fn handle_token(
+    str: &mut String,
+    format_token_stack: &mut Vec<Format>,
+    token: &Token,
+) -> Result<(), Error> {
+    match &token {
+        Token::Text(s) => str.push_str(s),
+        Token::Format(f) => handle_format(str, format_token_stack, *f)?,
+        Token::Space => str.push(' '),
+        Token::LineBreak => str.push_str("<br />"),
+        Token::ParagraphBreak => str.push_str("<br />"),
+        Token::ThematicBreak => str.push_str("<hr />"),
+    };
+
+    Ok(())
 }
 
-/// Push the `str` the appropriate HTML element for `format_token`.
+/// Push the appropriate HTML element for `format_token` into `str`.
 /// Pushes the `format_token` onto `format_token_stack`.
 ///
 /// If it hits [`Format::Reset`], it will call [`close_formatting_tags`].

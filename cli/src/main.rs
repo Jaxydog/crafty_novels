@@ -35,10 +35,13 @@ Not a #- new page
 
 Lots of paragraph breaks
 Some §cRED line breaks
-Some §lBOLD line breaks (2)
-   lots    of   spaces     "#;
+Some §l BOLD line breaks (2)
+Italic:§o text §rreset
+   lots    of   spaces     
+just one space 
+last line"#;
 
-    let tokens = stendhal::Stendhal::tokenize_string(input).unwrap();
+    let tokens = dbg!(stendhal::Stendhal::tokenize_string(input).unwrap());
     let html = Html::export_token_vector_to_string(tokens).unwrap();
 
     print!("{}", html);

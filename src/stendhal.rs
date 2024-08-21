@@ -76,7 +76,11 @@ fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
             }
         };
     }
+    // Builds a word out of consectutive characters
     let mut word_stack: Vec<char> = vec![];
+
+    // Whether or not this line has a formatting code yet to be reset
+    let mut trailing_formatting: bool = false;
 
     let mut iter = line.chars();
     while let Some(char) = iter.next() {
@@ -89,14 +93,21 @@ fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
             // Flush current word and insert new formatting code
             '§' => {
                 flush!(output, word_stack);
-                let code = iter.next().ok_or(Error::MissingFormatCode)?;
-                output.push(Token::Format(minecraft::Format::try_from(code)?))
+
+                let code: char = iter.next().ok_or(Error::MissingFormatCode)?;
+                let code: Token = Token::Format(minecraft::Format::try_from(code)?);
+
+                trailing_formatting = !matches!(code, Token::Format(minecraft::Format::Reset));
+                output.push(code)
             }
             // Add a new character onto the current word
             _ => word_stack.push(char),
         }
     }
     flush!(output, word_stack);
+    if trailing_formatting {
+        output.push(Token::Format(minecraft::Format::Reset));
+    }
     output.push(Token::LineBreak);
 
     Ok(())

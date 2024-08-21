@@ -29,6 +29,26 @@ pub enum Token {
     ThematicBreak,
 }
 
+impl Token {
+    /// Whether or not a [`Token`] corresponds to some kind of line break.
+    pub fn is_break(&self) -> bool {
+        matches!(
+            self,
+            Token::LineBreak | Token::ParagraphBreak | Token::ThematicBreak | Token::Space
+        )
+    }
+
+    /// Whether or not a [`Token`] corresponds to some kind of white space character.
+    pub fn is_white_space(&self) -> bool {
+        matches!(self, Token::Space) || self.is_break()
+    }
+
+    /// Whether or not a [`Token`] is [`Token::Text`].
+    pub fn is_text(&self) -> bool {
+        matches!(self, Token::Text(_))
+    }
+}
+
 impl From<&mut Vec<char>> for Token {
     /// Drain a `Vec<char>` to build a text node.
     fn from(value: &mut Vec<char>) -> Self {
