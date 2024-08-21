@@ -23,6 +23,8 @@ pub enum Error {
     NoSuchFormatCode(char),
     #[error("expected a format code after '§'")]
     MissingFormatCode,
+    #[error("no HTML entity associated with character '{0}'")]
+    NoSuchCharLiteral(char),
     #[error("could not perform I/O action")]
     Io(#[from] std::io::Error),
     #[error("could not format item")]

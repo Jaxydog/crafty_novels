@@ -15,21 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+use syntax::{HtmlEntity, HtmlEntityValue};
+
 use crate::{error::Error, minecraft::Format, syntax::Token, Export};
 use std::fmt::Write;
+
+mod syntax;
 
 pub struct Html {}
 
 impl Export for Html {
     /// Parse a given abstract syntax vector into HTML, then output that as a string.
-    ///
-    /// # Security
-    ///
-    /// This function makes no attempt to santize input. [`Token::Text`] can carry arbitrary HTML,
-    /// which creates an obvious opening for XSS attacks. Handle output with care.
-    ///
-    /// I should be converting <> to &lt;&gt; anyways. Does that nullify XSS? Are there any other
-    /// characters I need to check out? How do I handle & characters?
     fn export_token_vector_to_string(tokens: Vec<Token>) -> Result<Box<str>, Error> {
         let mut str: String = String::new();
 
@@ -51,11 +47,6 @@ impl Export for Html {
     }
 
     /// Parse a given abstract syntax vector into HTML, then output that as a file.
-    ///
-    /// # Security
-    ///
-    /// This function makes no attempt to santize input. [`Token::Text`] can carry arbitrary HTML,
-    /// which creates an obvious opening for XSS attacks. Handle output with care.
     #[allow(unused_variables)]
     fn export_token_vector_to_file(vec: Vec<Token>, output: std::fs::File) -> Result<(), Error> {
         todo!()
@@ -70,7 +61,7 @@ fn handle_token(
     token: &Token,
 ) -> Result<(), Error> {
     match &token {
-        Token::Text(s) => str.push_str(s),
+        Token::Text(s) => insert_string_as_html(str, s),
         Token::Format(f) => handle_format(str, format_token_stack, *f)?,
         Token::Space => str.push(' '),
         Token::LineBreak => str.push_str("<br />"),
@@ -79,6 +70,22 @@ fn handle_token(
     };
 
     Ok(())
+}
+
+/// Inserts a string of arbitrary text into HTML output in a syntax-aware manner.
+///
+/// For every character in `input`:
+///
+/// - If a literal character corresponds to an [`HtmlEntity`], write that entity into `output`
+/// - Otherwise, write the character to `output`
+fn insert_string_as_html(output: &mut String, input: &str) {
+    for char in input.chars() {
+        if let Ok(as_html_entity) = HtmlEntity::try_from(&char) {
+            output.push_str(&as_html_entity.to_string());
+        } else {
+            output.push(char)
+        }
+    }
 }
 
 /// Push the appropriate HTML element for `format_token` into `str`.

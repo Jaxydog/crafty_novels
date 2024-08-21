@@ -39,6 +39,9 @@ Some §l BOLD line breaks (2)
 Italic:§o text §rreset
    lots    of   spaces     
 just one space 
+<div>some HTML</div>
+&gt; <== not an <
+& ampersands &
 last line"#;
 
     let tokens = dbg!(stendhal::Stendhal::tokenize_string(input).unwrap());
