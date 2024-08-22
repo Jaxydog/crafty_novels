@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-use std::fs::File;
+use std::{fs::File, io::Write};
 
 mod error;
 pub mod html;
@@ -30,7 +30,10 @@ pub trait Export {
     /// Parse a given abstract syntax vector into a certain format, then output that as a string.
     fn export_token_vector_to_string(tokens: Vec<Token>) -> Result<Box<str>, Error>;
     /// Parse a given abstract syntax vector into a certain format, then output that as a file.
-    fn export_token_vector_to_file(tokens: Vec<Token>, output: File) -> Result<(), Error>;
+    fn export_token_vector_to_writer(
+        tokens: Vec<Token>,
+        output: &mut impl Write,
+    ) -> Result<(), Error>;
 }
 
 pub trait LexicalTokenizer {

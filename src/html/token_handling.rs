@@ -16,24 +16,24 @@
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
 use crate::{error::Error, minecraft::Format, syntax::Token};
-use std::fmt::Write;
+use std::io::{BufWriter, Write};
 
 use crate::html::syntax::HtmlEntity;
 
 /// Push the appropriate HTML element(s) for `token` into `str`.
 /// If `token` is [`Token::Format`], it is pushed onto `format_token_stack`.
 pub fn handle_token(
-    str: &mut String,
+    output: &mut BufWriter<impl Write>,
     format_token_stack: &mut Vec<Format>,
     token: &Token,
 ) -> Result<(), Error> {
     match &token {
-        Token::Text(s) => insert_string_as_html(str, s),
-        Token::Format(f) => handle_format(str, format_token_stack, *f)?,
-        Token::Space => str.push(' '),
-        Token::LineBreak => str.push_str("<br />"),
-        Token::ParagraphBreak => str.push_str("<br />"),
-        Token::ThematicBreak => str.push_str("<hr />"),
+        Token::Text(s) => insert_string_as_html(output, s)?,
+        Token::Format(f) => handle_format(output, format_token_stack, *f)?,
+        Token::Space => output.write_all(&[b' '])?,
+        Token::LineBreak => output.write_all(b"<br />")?,
+        Token::ParagraphBreak => output.write_all(b"<br />")?,
+        Token::ThematicBreak => output.write_all(b"<hr />")?,
     };
 
     Ok(())
@@ -45,14 +45,16 @@ pub fn handle_token(
 ///
 /// - If a literal character corresponds to an [`HtmlEntity`], write that entity into `output`
 /// - Otherwise, write the character to `output`
-fn insert_string_as_html(output: &mut String, input: &str) {
+fn insert_string_as_html(output: &mut BufWriter<impl Write>, input: &str) -> Result<(), Error> {
     for char in input.chars() {
         if let Ok(as_html_entity) = HtmlEntity::try_from(&char) {
-            output.push_str(&as_html_entity.to_string());
+            output.write_all(as_html_entity.to_string().as_bytes())?;
         } else {
-            output.push(char)
+            output.write_all(&[char as u8])?;
         }
     }
+
+    Ok(())
 }
 
 /// Push the appropriate HTML element for `format_token` into `str`.
@@ -60,7 +62,7 @@ fn insert_string_as_html(output: &mut String, input: &str) {
 ///
 /// If it hits [`Format::Reset`], it will call [`close_formatting_tags`].
 fn handle_format(
-    str: &mut String,
+    output: &mut BufWriter<impl Write>,
     format_token_stack: &mut Vec<Format>,
     format_token: Format,
 ) -> Result<(), Error> {
@@ -71,7 +73,7 @@ fn handle_format(
     /// - Provide `$format_token_stack` (to push `$format_token` into it).
     macro_rules! open_html {
         (
-            $str:expr, $format_token_stack:expr, $format_token:expr;
+            $output:expr, $format_token_stack:expr, $format_token:expr;
             Color($color_var:ident) => $color_html:expr;
             $( $format:ident => $html:expr ),+ ;
             Reset => $reset_fn:expr;
@@ -79,12 +81,12 @@ fn handle_format(
             match $format_token {
                 Format::Color($color_var) => {
                     $format_token_stack.push($format_token);
-                    write!($str, $color_html)?;
+                    $output.write_all(::std::format!($color_html).as_bytes())?;
                 }
                 $(
                     Format::$format => {
                         $format_token_stack.push($format_token);
-                        write!($str, $html)?;
+                        $output.write_all($html.to_string().as_bytes())?;
                     }
                 ),+ ,
                 Format::Reset => $reset_fn,
@@ -94,14 +96,14 @@ fn handle_format(
     }
 
     open_html!(
-        str, format_token_stack, format_token;
+        output, format_token_stack, format_token;
         Color(c) => "<span style='color:{c}'>";
         Obfuscated => "<code>",
         Bold => "<b>",
         Strikethrough => "<s>",
         Underline => "<u>",
         Italic => "<i>";
-        Reset => close_formatting_tags(str, format_token_stack)?;
+        Reset => close_formatting_tags(output, format_token_stack)?;
     );
 
     Ok(())
@@ -109,20 +111,20 @@ fn handle_format(
 
 /// Closes all the HTML elements opened in [`handle_format`] by the tokens in `format_token_stack`.
 fn close_formatting_tags(
-    str: &mut String,
+    output: &mut BufWriter<impl Write>,
     format_token_stack: &mut Vec<Format>,
 ) -> Result<(), Error> {
     macro_rules! close_html {
         (
-            $str:expr, $format_token:expr;
+            $output:expr, $format_token:expr;
             Color => $color_html:expr;
             $( $format:ident => $html:expr ),+ ;
             Reset => $reset_fn:expr;
         ) => {
             match $format_token {
-                Format::Color(_) => write!($str, $color_html)?,
+                Format::Color(_) => $output.write_all($color_html.to_string().as_bytes())?,
                 $(
-                    Format::$format => write!($str, $html)?
+                    Format::$format => $output.write_all($html.to_string().as_bytes())?
                 ),+ ,
                 Format::Reset => $reset_fn,
             }
@@ -131,7 +133,7 @@ fn close_formatting_tags(
 
     while let Some(format_token) = format_token_stack.pop() {
         close_html!(
-            str, format_token;
+            output, format_token;
             Color => "</span>";
             Obfuscated => "</code>",
             Bold => "</b>",

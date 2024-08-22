@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+use std::io::{BufWriter, Write};
+
 use crate::{error::Error, minecraft::Format, syntax::Token, Export};
 
 mod syntax;
@@ -26,28 +28,39 @@ pub struct Html {}
 impl Export for Html {
     /// Parse a given abstract syntax vector into HTML, then output that as a string.
     fn export_token_vector_to_string(tokens: Vec<Token>) -> Result<Box<str>, Error> {
-        let mut str: String = String::new();
+        let mut bytes: Vec<u8> = vec![];
+
+        Self::export_token_vector_to_writer(tokens, &mut bytes)?;
+
+        // `Self::export_token_vector_to_writer` will only ever be writing UTF-8 strings
+        let as_str = String::from_utf8(bytes)?.into_boxed_str();
+
+        Ok(as_str)
+    }
+
+    /// Parse a given abstract syntax vector into HTML, then output that into a writer, like a
+    /// [`std::fs::File`].
+    fn export_token_vector_to_writer(
+        tokens: Vec<Token>,
+        output: &mut impl Write,
+    ) -> Result<(), Error> {
+        let mut writer = BufWriter::new(output);
 
         // Most readable
-        str.push_str("<article style=white-space:break-spaces>");
+        writer.write_all(b"<article style=white-space:break-spaces>")?;
 
         // Most accurate
         // Does, however, still consume spaces that break, which Minecraft books do not
-        // str.push_str("<article style=line-break:anywhere>");
+        // writer.write_all(b"<article style=line-break:anywhere>");
 
         let mut format_token_stack: Vec<Format> = vec![];
         for token in tokens {
-            handle_token(&mut str, &mut format_token_stack, &token)?;
+            handle_token(&mut writer, &mut format_token_stack, &token)?;
         }
 
-        str.push_str("</article>");
+        writer.write_all(b"</article>")?;
 
-        Ok(str.into_boxed_str())
-    }
-
-    /// Parse a given abstract syntax vector into HTML, then output that as a file.
-    #[allow(unused_variables)]
-    fn export_token_vector_to_file(vec: Vec<Token>, output: std::fs::File) -> Result<(), Error> {
-        todo!()
+        writer.flush()?;
+        Ok(())
     }
 }

@@ -29,4 +29,6 @@ pub enum Error {
     Io(#[from] std::io::Error),
     #[error("could not format item")]
     Fmt(#[from] std::fmt::Error),
+    #[error("could not convert to UTF-8")]
+    Utf8Error(#[from] std::string::FromUtf8Error),
 }
