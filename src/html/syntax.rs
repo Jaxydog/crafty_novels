@@ -280,6 +280,7 @@ impl Display for HtmlEntity {
 }
 
 /// The data associated with an [`HtmlEntity`], necessary to display it.
+#[allow(dead_code)]
 pub struct HtmlEntityValue {
     /// The literal character representation of the entity.
     //

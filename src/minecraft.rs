@@ -259,6 +259,7 @@ impl Display for FormatCode {
 }
 
 /// Represents a color as it is used for text formatting in Minecraft.
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct ColorValue {
     /// The character following the § in the code assocated with the color.
