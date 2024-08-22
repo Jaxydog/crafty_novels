@@ -15,20 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-#[derive(thiserror::Error, Debug)]
-pub enum Error {
-    #[error("expected a two character string starting with §, received '{0}'")]
-    InvalidFormatCodeString(String),
-    #[error("no such format code '{0}'")]
-    NoSuchFormatCode(char),
-    #[error("expected a format code after '§'")]
-    MissingFormatCode,
-    #[error("no HTML entity associated with character '{0}'")]
-    NoSuchCharLiteral(char),
-    #[error("could not perform I/O action")]
-    Io(#[from] std::io::Error),
-    #[error("could not format item")]
-    Fmt(#[from] std::fmt::Error),
-    #[error("could not convert to UTF-8")]
-    Utf8(#[from] std::string::FromUtf8Error),
+use std::{
+    fmt::Display,
+    io::{BufWriter, Result, Write},
+};
+
+/// Write a string to a byte writer.
+pub fn write_str(writer: &mut BufWriter<impl Write>, str: impl Display) -> Result<()> {
+    writer.write_all(str.to_string().as_bytes())
+}
+
+/// Write a character to a byte writer.
+pub fn write_char(writer: &mut BufWriter<impl Write>, char: char) -> Result<()> {
+    writer.write_all(&[char as u8])
 }
