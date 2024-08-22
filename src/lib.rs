@@ -29,7 +29,7 @@ use syntax::Token;
 pub trait Export {
     /// Parse a given abstract syntax vector into a certain format, then output that as a string.
     fn export_token_vector_to_string(tokens: Vec<Token>) -> Result<Box<str>, Error>;
-    /// Parse a given abstract syntax vector into a certain format, then output that as a file.
+    /// Parse a given abstract syntax vector into a certain format, writing the result into `output`.
     fn export_token_vector_to_writer(
         tokens: Vec<Token>,
         output: &mut impl Write,
