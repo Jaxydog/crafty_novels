@@ -22,7 +22,6 @@ use crate::{error::Error, minecraft::Format, syntax::Token, Export};
 mod syntax;
 mod token_handling;
 use token_handling::handle_token;
-mod write;
 
 pub struct Html {}
 

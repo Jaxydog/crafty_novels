@@ -20,8 +20,6 @@ use std::io::{BufWriter, Write};
 
 use crate::html::syntax::HtmlEntity;
 
-use crate::html::write::{write_char, write_str};
-
 /// Push the appropriate HTML element(s) for `token` into `output`.
 /// If `token` is [`Token::Format`], it is pushed onto `format_token_stack`.
 pub fn handle_token(
@@ -32,10 +30,10 @@ pub fn handle_token(
     match &token {
         Token::Text(s) => insert_string_as_html(output, s)?,
         Token::Format(f) => handle_format(output, format_token_stack, *f)?,
-        Token::Space => write_char(output, ' ')?,
-        Token::LineBreak => write_str(output, "<br />")?,
-        Token::ParagraphBreak => write_str(output, "<br />")?,
-        Token::ThematicBreak => write_str(output, "<hr />")?,
+        Token::Space => write!(output, " ")?,
+        Token::LineBreak => write!(output, "<br />")?,
+        Token::ParagraphBreak => write!(output, "<br />")?,
+        Token::ThematicBreak => write!(output, "<hr />")?,
     };
 
     Ok(())
@@ -50,9 +48,9 @@ pub fn handle_token(
 fn insert_string_as_html(output: &mut BufWriter<impl Write>, input: &str) -> Result<(), Error> {
     for char in input.chars() {
         if let Ok(as_html_entity) = HtmlEntity::try_from(&char) {
-            write_str(output, as_html_entity)?;
+            write!(output, "{as_html_entity}")?;
         } else {
-            write_char(output, char)?;
+            write!(output, "{char}")?;
         }
     }
 
@@ -83,12 +81,12 @@ fn handle_format(
             match $format_token {
                 Format::Color($color_var) => {
                     $format_token_stack.push($format_token);
-                    $output.write_all(::std::format!($color_html).as_bytes())?;
+                    write!($output, $color_html)?;
                 }
                 $(
                     Format::$format => {
                         $format_token_stack.push($format_token);
-                        write_str($output, $html)?;
+                        write!($output, $html)?;
                     }
                 ),+ ,
                 Format::Reset => $reset_fn,
@@ -124,9 +122,9 @@ fn close_formatting_tags(
             Reset => $reset_fn:expr;
         ) => {
             match $format_token {
-                Format::Color(_) => write_str($output, $color_html)?,
+                Format::Color(_) => write!($output, $color_html)?,
                 $(
-                    Format::$format => write_str($output, $html)?
+                    Format::$format => write!($output, $html)?
                 ),+ ,
                 Format::Reset => $reset_fn,
             }
