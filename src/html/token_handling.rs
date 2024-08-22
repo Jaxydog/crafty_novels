@@ -119,14 +119,13 @@ fn close_formatting_tags(
             $output:expr, $format_token:expr;
             Color => $color_html:expr;
             $( $format:ident => $html:expr ),+ ;
-            Reset => $reset_fn:expr;
         ) => {
             match $format_token {
                 Format::Color(_) => write!($output, $color_html)?,
                 $(
                     Format::$format => write!($output, $html)?
                 ),+ ,
-                Format::Reset => $reset_fn,
+                Format::Reset => unreachable!(),
             }
         };
     }
@@ -140,7 +139,6 @@ fn close_formatting_tags(
             Strikethrough => "</s>",
             Underline => "</u>",
             Italic => "</i>";
-            Reset => unreachable!();
         );
     }
 
