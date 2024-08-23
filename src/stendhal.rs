@@ -69,13 +69,12 @@ fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
     }
 
     /// Flush the current word stack into a text node.
-    macro_rules! flush {
-        ($target:expr, $vec:expr) => {
-            if !$vec.is_empty() {
-                $target.push((&mut $vec).into());
-            }
-        };
+    fn flush(output: &mut Vec<Token>, word_stack: &mut Vec<char>) {
+        if !word_stack.is_empty() {
+            output.push((word_stack).into());
+        }
     }
+
     // Builds a word out of consectutive characters
     let mut word_stack: Vec<char> = vec![];
 
@@ -87,12 +86,12 @@ fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
         match char {
             // Flush current word and insert a space
             ' ' => {
-                flush!(output, word_stack);
+                flush(output, &mut word_stack);
                 output.push(Token::Space)
             }
             // Flush current word and insert new formatting code
             '§' => {
-                flush!(output, word_stack);
+                flush(output, &mut word_stack);
 
                 let code: char = iter.next().ok_or(Error::MissingFormatCode)?;
                 let code: Token = Token::Format(minecraft::Format::try_from(code)?);
@@ -104,7 +103,7 @@ fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
             _ => word_stack.push(char),
         }
     }
-    flush!(output, word_stack);
+    flush(output, &mut word_stack);
     if trailing_formatting {
         output.push(Token::Format(minecraft::Format::Reset));
     }
