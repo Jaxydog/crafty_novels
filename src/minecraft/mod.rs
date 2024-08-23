@@ -111,6 +111,6 @@ impl FromStr for Format {
 
 impl From<Format> for char {
     fn from(value: Format) -> Self {
-        char::from(FormatCode::from(value))
+        Self::from(FormatCode::from(value))
     }
 }

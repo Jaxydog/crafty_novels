@@ -26,8 +26,6 @@ use crate::minecraft::Format;
 use crate::syntax::Token;
 use crate::LexicalTokenizer;
 
-const START_OF_PAGE: &str = "#- ";
-
 pub struct Stendhal;
 
 impl LexicalTokenizer for Stendhal {
@@ -57,6 +55,13 @@ impl LexicalTokenizer for Stendhal {
 
 /// Parse a line in the Stendhal format into an abstract syntax vector.
 fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
+    /// Flush the current word stack into a text node.
+    fn flush(output: &mut Vec<Token>, word_stack: &mut Vec<char>) {
+        if !word_stack.is_empty() {
+            output.push((word_stack).into());
+        }
+    }
+
     if line.is_empty() {
         output.push(Token::ParagraphBreak);
         return Ok(());
@@ -68,18 +73,11 @@ fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
         output.push(Token::ThematicBreak);
     }
 
-    /// Flush the current word stack into a text node.
-    fn flush(output: &mut Vec<Token>, word_stack: &mut Vec<char>) {
-        if !word_stack.is_empty() {
-            output.push((word_stack).into());
-        }
-    }
-
     // Builds a word out of consectutive characters
     let mut word_stack: Vec<char> = vec![];
 
     // Whether or not this line has a formatting code yet to be reset
-    let mut trailing_formatting: bool = false;
+    let mut trailing_formatting = false;
 
     let mut iter = line.chars();
     while let Some(char) = iter.next() {
@@ -87,7 +85,7 @@ fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
             // Flush current word and insert a space
             ' ' => {
                 flush(output, &mut word_stack);
-                output.push(Token::Space)
+                output.push(Token::Space);
             }
             // Flush current word and insert new formatting code
             '§' => {
@@ -97,7 +95,7 @@ fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
                 let code: Token = Token::Format(Format::try_from(code)?);
 
                 trailing_formatting = !matches!(code, Token::Format(Format::Reset));
-                output.push(code)
+                output.push(code);
             }
             // Add a new character onto the current word
             _ => word_stack.push(char),
@@ -115,7 +113,7 @@ fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
 /// If a string begins with `"#- "`, return a tuple holding a `bool` indicating if the prefix was
 /// stripped and the line with `"#- "` removed.
 fn parse_start_of_page(line: &str) -> (bool, &str) {
-    match line.strip_prefix(START_OF_PAGE) {
+    match line.strip_prefix("#- ") {
         Some(first_line_of_page) => (true, first_line_of_page),
         None => (false, line),
     }

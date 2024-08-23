@@ -67,7 +67,7 @@ fn handle_format(
     format_token: Format,
 ) -> Result<(), Error> {
     /// Generates a match statement with [`Format`] variants to write the given HTML (containing
-    /// opening tags) into `str`.
+    /// opening tags) into `output`.
     ///
     /// - Provide `$color_var` (to use it inside `$color_html`).
     /// - Provide `$format_token_stack` (to push `$format_token` into it).
@@ -114,6 +114,8 @@ fn close_formatting_tags(
     output: &mut BufWriter<impl Write>,
     format_token_stack: &mut Vec<Format>,
 ) -> Result<(), Error> {
+    /// Generates a match statement with [`Format`] variants to write the given HTML (containing
+    /// closing tags) into `output`.
     macro_rules! close_html {
         (
             $output:expr, $format_token:expr;

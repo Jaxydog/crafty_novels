@@ -20,6 +20,7 @@ use std::fmt::{Display, UpperHex};
 
 use super::FormatCode;
 
+/// Represents the possible text colors (foreground and background) in Minecraft Java Edition.
 #[derive(Copy, Clone, Debug)]
 pub enum Color {
     Black,
@@ -107,7 +108,7 @@ impl ColorValue {
     ) -> Self {
         Self {
             code,
-            name: name.as_ref().to_string().into_boxed_str(),
+            name: name.as_ref().to_owned().into_boxed_str(),
             fg: fg.into(),
             bg: bg.into(),
         }
@@ -123,7 +124,7 @@ impl Display for ColorTuple {
     ///
     /// Ex. `(255, 255, 255)` -> `"#FFFFFF"`.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "#{:X}", self)
+        write!(f, "#{self:X}")
     }
 }
 

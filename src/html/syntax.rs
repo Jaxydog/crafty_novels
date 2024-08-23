@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+#![allow(clippy::too_many_lines)]
+
 use std::fmt::Display;
 
 use crate::error::Error;
@@ -327,7 +329,7 @@ impl From<&HtmlEntity> for HtmlEntityValue {
             ( $(
                 $entity:ident => $literal:expr, $number:expr, $name:expr
             );+ ; ) => {
-                match entity {$(
+                match *entity {$(
                     HtmlEntity::$entity => HtmlEntityValue::new($literal, $number, $name.to_string().into_boxed_str())
                 ),+}
             };
@@ -603,7 +605,7 @@ impl TryFrom<&char> for HtmlEntity {
             (
                 $( $char:expr => $entity:ident ),+ ,
             ) => {
-                match literal {
+                match *literal {
                     $( $char => Ok(Self::$entity) ),+,
                     _ => Err(Error::NoSuchCharLiteral(*literal)),
                 }
