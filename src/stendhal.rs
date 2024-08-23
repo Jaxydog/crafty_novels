@@ -22,7 +22,6 @@ use std::io::BufRead;
 use std::io::BufReader;
 
 use crate::error::Error;
-use crate::minecraft;
 use crate::minecraft::Format;
 use crate::syntax::Token;
 use crate::LexicalTokenizer;
