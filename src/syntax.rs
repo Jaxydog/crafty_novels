@@ -50,7 +50,7 @@ impl Token {
 }
 
 impl From<&mut Vec<char>> for Token {
-    /// Drain a `Vec<char>` to build a text node.
+    /// Drain a [`Vec<char>`] to build a text node.
     fn from(value: &mut Vec<char>) -> Self {
         Self::Text(value.drain(..).collect::<Box<str>>())
     }

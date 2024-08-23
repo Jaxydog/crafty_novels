@@ -52,9 +52,10 @@ impl TryFrom<FormatCode> for Format {
 
     /// Look up a [`code`][Self::code] against Minecraft Java Edition's list of formatting codes.
     fn try_from(code: FormatCode) -> Result<Self, Self::Error> {
-        /// Match the input `FormatCode` to a `Self` Value.
+        /// Match the input [`FormatCode`] to a [`Format`] Value.
         ///
-        /// Codes that match `Self::Color` are separated from other `Self` variants by a semicolon.
+        /// Codes that match [`Format::Color`] are separated from other [`Format`] variants by a
+        /// semicolon.
         macro_rules! match_code {
             (
                 $( $color_code:expr => $color:ident ),+ ;
@@ -98,7 +99,7 @@ impl TryFrom<FormatCode> for Format {
 impl FromStr for Format {
     type Err = Error;
 
-    /// Get the character following the `§` in a Minecraft format code.
+    /// Get the character following the `'§'` in a Minecraft format code.
     ///
     /// Expects a two byte string that starts with `'§'`.
     ///

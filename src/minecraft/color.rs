@@ -41,9 +41,9 @@ pub enum Color {
 }
 
 impl From<Color> for ColorValue {
-    /// Get the values associated with a given `Color` in Minecraft Java Edition.
+    /// Get the values associated with a given [`Color`] in Minecraft Java Edition.
     fn from(color: Color) -> Self {
-        /// Match the input `Color` to a hardcoded `ColorValue`.
+        /// Match the input [`Color`] to a hardcoded [`ColorValue`].
         macro_rules! color_match {
             ( $(
                 $color:ident => $code:expr, $name:expr, $fg:expr, $bg:expr
@@ -81,11 +81,11 @@ impl From<Color> for ColorValue {
 pub struct ColorValue {
     /// The character following the § in the code assocated with the color.
     ///
-    /// Ex. The `0` in `§0`.
+    /// Ex. The `'0'` in `"§0"`.
     pub code: FormatCode,
     /// The proper name associated with the color.
     ///
-    /// Ex. `gold`.
+    /// Ex. `"gold"`.
     pub name: Box<str>,
     /// The foreground color assocated with the color.
     ///
@@ -98,7 +98,7 @@ pub struct ColorValue {
 }
 
 impl ColorValue {
-    /// Create a new instance of `Color`, doing type conversions where necessary.
+    /// Create a new instance of [`Color`], doing type conversions where necessary.
     pub fn new(
         code: FormatCode,
         name: impl AsRef<str>,
@@ -119,18 +119,18 @@ impl ColorValue {
 pub struct ColorTuple(pub u8, pub u8, pub u8);
 
 impl Display for ColorTuple {
-    /// Displays the color in hexadecimal with a trailing `#`.
+    /// Displays the color in hexadecimal with a leading `'#'`.
     ///
-    /// Ex. `(255, 255, 255)` -> `#FFFFFF`.
+    /// Ex. `(255, 255, 255)` -> `"#FFFFFF"`.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "#{:X}", self)
     }
 }
 
 impl UpperHex for ColorTuple {
-    /// Displays the color in hexadecimal without a trailing `#`.
+    /// Displays the color in hexadecimal without a leading `#`.
     ///
-    /// Ex. `(255, 255, 255)` -> `FFFFFF`.
+    /// Ex. `(255, 255, 255)` -> `"FFFFFF"`.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:X}{:X}{:X}", self.0, self.1, self.2)
     }

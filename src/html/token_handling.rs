@@ -66,7 +66,7 @@ fn handle_format(
     format_token_stack: &mut Vec<Format>,
     format_token: Format,
 ) -> Result<(), Error> {
-    /// Generates a match statement with `Format` variants to write the given HTML (containing
+    /// Generates a match statement with [`Format`] variants to write the given HTML (containing
     /// opening tags) into `str`.
     ///
     /// - Provide `$color_var` (to use it inside `$color_html`).

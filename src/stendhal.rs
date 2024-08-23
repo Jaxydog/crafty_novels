@@ -112,8 +112,8 @@ fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
     Ok(())
 }
 
-/// If a string begins with `#- `, return a tuple holding a `bool` indicating if the prefix was
-/// stripped and the line with `#- ` removed.
+/// If a string begins with `"#- "`, return a tuple holding a `bool` indicating if the prefix was
+/// stripped and the line with `"#- "` removed.
 fn parse_start_of_page(line: &str) -> (bool, &str) {
     match line.strip_prefix(START_OF_PAGE) {
         Some(first_line_of_page) => (true, first_line_of_page),

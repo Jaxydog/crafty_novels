@@ -22,9 +22,9 @@ use crate::{
 };
 use std::{fmt::Display, str::FromStr};
 
-/// The character following the § in the code assocated with a format code.
+/// The character following the `'§'` in the code assocated with a format code.
 ///
-/// Ex. The `0` in `§0`.
+/// Ex. The `'0'` in `"§0"`.
 #[repr(transparent)]
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FormatCode(pub char);
@@ -50,7 +50,7 @@ impl From<char> for FormatCode {
 impl FromStr for FormatCode {
     type Err = Error;
 
-    /// Get the character following the `§` in a Minecraft format code.
+    /// Get the character following the '`§`' in a Minecraft format code.
     ///
     /// Expects a two byte string that starts with `'§'`.
     ///
