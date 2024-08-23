@@ -47,18 +47,18 @@ impl Export for Html {
         let mut writer = BufWriter::new(output);
 
         // Most readable
-        writer.write_all(b"<article style=white-space:break-spaces>")?;
+        write!(writer, "<article style=white-space:break-spaces>")?;
 
         // Most accurate
         // Does, however, still consume spaces that break, which Minecraft books do not
-        // writer.write_all(b"<article style=line-break:anywhere>");
+        // write!(writer, "<article style=line-break:anywhere>");
 
         let mut format_token_stack: Vec<Format> = vec![];
         for token in tokens {
             handle_token(&mut writer, &mut format_token_stack, &token)?;
         }
 
-        writer.write_all(b"</article>")?;
+        write!(writer, "</article>")?;
 
         writer.flush()?;
         Ok(())
