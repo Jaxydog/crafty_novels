@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+#![warn(clippy::nursery, clippy::pedantic)]
+#![cfg_attr(debug_assertions, allow(clippy::missing_errors_doc))]
+
 use std::{fs::File, io::Write};
 
 mod error;

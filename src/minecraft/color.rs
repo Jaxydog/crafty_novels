@@ -16,6 +16,8 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+#![allow(clippy::module_name_repetitions)]
+
 use std::fmt::{Display, UpperHex};
 
 use super::FormatCode;
