@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
 // Copyright © 2024 RemasteredArch
+// Copyright © 2024 Jaxydog
 //
 // This file is part of crafty_novels.
 //
@@ -38,58 +39,11 @@ pub enum Format {
     Reset,
 }
 
-impl Format {
-    /// Returns this format's associated [`FormatCode`].
-    ///
-    /// Look up a [`code`][Self::code] against Minecraft Java Edition's list of formatting codes.
-    pub const fn code(self) -> FormatCode {
-        /// Match the input `Self` to a `FormatCode` Value.
-        ///
-        /// Codes that match `Self::Color` are separated from other `Self` variants by a semicolon.
-        macro_rules! match_format {
-            (
-                $( $color:ident => $color_code:literal ),+ ;
-                $( $variant:ident => $format_code:literal ),+ ;
-            ) => {
-                match self {
-                    $( Self::Color(Color::$color) => FormatCode::new($color_code), )+
-                    $( Self::$variant => FormatCode::new($format_code), )+
-                }
-            };
-        }
-
-        match_format! {
-            Black => '0',
-            DarkBlue => '1',
-            DarkGreen => '2',
-            DarkAqua => '3',
-            DarkRed => '4',
-            DarkPurple => '5',
-            Gold => '6',
-            Gray => '7',
-            DarkGray => '8',
-            Blue => '9',
-            Green => 'a',
-            Aqua => 'b',
-            Red => 'c',
-            LightPurple => 'd',
-            Yellow => 'e',
-            White => 'f';
-            Obfuscated => 'k',
-            Bold => 'l',
-            Strikethrough => 'm',
-            Underline => 'n',
-            Italic => 'o',
-            Reset => 'r';
-        }
-    }
-}
-
 impl TryFrom<char> for Format {
     type Error = Error;
 
     fn try_from(value: char) -> Result<Self, Self::Error> {
-        <Self as TryFrom<FormatCode>>::try_from(FormatCode::new(value))
+        Self::try_from(FormatCode::new(value))
     }
 }
 
@@ -146,10 +100,16 @@ impl FromStr for Format {
 
     /// Get the character following the `§` in a Minecraft format code.
     ///
-    /// Expects a two byte string that starts with `§`.
+    /// Expects a two byte string that starts with `'§'`.
     ///
-    /// Ex. The `0` in `§0`.
+    /// Ex. The `'0'` in `"§0"`.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Self::try_from(FormatCode::from_str(s)?)
+    }
+}
+
+impl From<Format> for char {
+    fn from(value: Format) -> Self {
+        char::from(FormatCode::from(value))
     }
 }

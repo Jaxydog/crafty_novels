@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
 // Copyright © 2024 RemasteredArch
+// Copyright © 2024 Jaxydog
 //
 // This file is part of crafty_novels.
 //
@@ -15,7 +16,10 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{minecraft::Format, Error};
+use crate::{
+    minecraft::{Color, Format},
+    Error,
+};
 use std::{fmt::Display, str::FromStr};
 
 /// The character following the § in the code assocated with a format code.
@@ -37,21 +41,20 @@ impl FormatCode {
     }
 }
 
-impl From<Format> for FormatCode {
-    fn from(value: Format) -> Self {
-        value.code()
-    }
-}
-
 impl From<char> for FormatCode {
     fn from(value: char) -> Self {
-        Self(value)
+        Self::new(value)
     }
 }
 
 impl FromStr for FormatCode {
     type Err = Error;
 
+    /// Get the character following the `§` in a Minecraft format code.
+    ///
+    /// Expects a two byte string that starts with `'§'`.
+    ///
+    /// Ex. The `'0'` in `"§0"`.
     fn from_str(string: &str) -> Result<Self, Self::Err> {
         if !(string.starts_with('§') && string.chars().count() == 2) {
             return Err(Error::InvalidFormatCodeString(string.to_string()));
@@ -65,7 +68,64 @@ impl FromStr for FormatCode {
 }
 
 impl Display for FormatCode {
+    /// Format the code as `"§CODE"`.
+    ///
+    /// For example, `'l'` ([`Format::Bold`]) formats as `"§l"`.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "§{}", self.get())
+    }
+}
+
+impl From<FormatCode> for char {
+    /// Returns the inner character.
+    fn from(value: FormatCode) -> Self {
+        value.get()
+    }
+}
+
+impl From<Format> for FormatCode {
+    /// Returns a [`Format`]'s associated [`FormatCode`].
+    ///
+    /// Looks up the code against Minecraft Java Edition's list of formatting codes.
+    fn from(value: Format) -> Self {
+        /// Match the input [`Format`] to a [`FormatCode`] value.
+        ///
+        /// Codes that match [`Format::Color`] are separated from other [`Format`] variants by a semicolon.
+        macro_rules! match_format {
+            (
+                $( $color:ident => $color_code:literal ),+ ;
+                $( $variant:ident => $format_code:literal ),+ ;
+            ) => {
+                match value {
+                    $( Format::Color(Color::$color) => FormatCode::new($color_code), )+
+                    $( Format::$variant => FormatCode::new($format_code), )+
+                }
+            };
+        }
+
+        match_format! {
+            Black => '0',
+            DarkBlue => '1',
+            DarkGreen => '2',
+            DarkAqua => '3',
+            DarkRed => '4',
+            DarkPurple => '5',
+            Gold => '6',
+            Gray => '7',
+            DarkGray => '8',
+            Blue => '9',
+            Green => 'a',
+            Aqua => 'b',
+            Red => 'c',
+            LightPurple => 'd',
+            Yellow => 'e',
+            White => 'f';
+            Obfuscated => 'k',
+            Bold => 'l',
+            Strikethrough => 'm',
+            Underline => 'n',
+            Italic => 'o',
+            Reset => 'r';
+        }
     }
 }
