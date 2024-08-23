@@ -23,6 +23,7 @@ use std::io::BufReader;
 
 use crate::error::Error;
 use crate::minecraft;
+use crate::minecraft::Format;
 use crate::syntax::Token;
 use crate::LexicalTokenizer;
 
@@ -94,9 +95,9 @@ fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
                 flush(output, &mut word_stack);
 
                 let code: char = iter.next().ok_or(Error::MissingFormatCode)?;
-                let code: Token = Token::Format(minecraft::Format::try_from(code)?);
+                let code: Token = Token::Format(Format::try_from(code)?);
 
-                trailing_formatting = !matches!(code, Token::Format(minecraft::Format::Reset));
+                trailing_formatting = !matches!(code, Token::Format(Format::Reset));
                 output.push(code)
             }
             // Add a new character onto the current word
@@ -105,7 +106,7 @@ fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
     }
     flush(output, &mut word_stack);
     if trailing_formatting {
-        output.push(Token::Format(minecraft::Format::Reset));
+        output.push(Token::Format(Format::Reset));
     }
     output.push(Token::LineBreak);
 
