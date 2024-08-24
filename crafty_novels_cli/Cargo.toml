@@ -10,6 +10,7 @@ license.workspace = true
 repository.workspace = true
 readme.workspace = true
 edition.workspace = true
+publish.workspace = true
 
 [dependencies]
 crafty_novels = { version = "0.1.0", path = ".." }

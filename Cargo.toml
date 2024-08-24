@@ -11,6 +11,7 @@ license.workspace = true
 edition.workspace = true
 
 [workspace]
+package.publish = false
 package.authors = ["RemasteredArch"]
 package.repository = "https://github.com/RemasteredArch/ip_geo/"
 package.readme = true
