@@ -5,10 +5,12 @@ license = "AGPL-3.0-or-later"
 repository = "https://github.com/RemasteredArch/ip_geo/"
 version = "0.1.0"
 edition = "2021"
+keywords = ["parser", "html", "minecraft"]
+categories = ["parser-implementations"]
+
 
 [workspace]
 members = ["cli"]
-# members = ["cli", "gui"]
 
 [dependencies]
 thiserror = "1.0.63"
