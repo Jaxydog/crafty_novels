@@ -17,14 +17,11 @@
 
 #![allow(dead_code)]
 
-use std::fs::File;
-use std::io::BufRead;
-use std::io::BufReader;
-
-use crate::error::Error;
-use crate::minecraft::Format;
-use crate::syntax::Token;
-use crate::LexicalTokenizer;
+use crate::{error::Error, minecraft::Format, syntax::Token, LexicalTokenizer};
+use std::{
+    fs::File,
+    io::{BufRead, BufReader},
+};
 
 pub struct Stendhal;
 

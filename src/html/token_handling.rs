@@ -15,10 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+use super::syntax::HtmlEntity;
 use crate::{error::Error, minecraft::Format, syntax::Token};
 use std::io::{BufWriter, Write};
-
-use crate::html::syntax::HtmlEntity;
 
 /// Push the appropriate HTML element(s) for `token` into `output`.
 /// If `token` is [`Token::Format`], it is pushed onto `format_token_stack`.

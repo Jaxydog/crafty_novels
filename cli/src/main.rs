@@ -15,10 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-use crafty_novels::html::Html;
-use crafty_novels::stendhal;
-use crafty_novels::Export;
-use crafty_novels::LexicalTokenizer;
+use crafty_novels::{html::Html, stendhal, Export, LexicalTokenizer};
 
 fn main() {
     test_string_parsing();

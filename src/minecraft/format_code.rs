@@ -16,10 +16,8 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{
-    minecraft::{Color, Format},
-    Error,
-};
+use super::{Color, Format};
+use crate::Error;
 use std::{fmt::Display, str::FromStr};
 
 /// The character following the `'§'` in the code assocated with a format code.

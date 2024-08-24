@@ -15,12 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-use std::io::{BufWriter, Write};
-
 use crate::{error::Error, minecraft::Format, syntax::Token, Export};
+use std::io::{BufWriter, Write};
 
 mod syntax;
 mod token_handling;
+
 use token_handling::handle_token;
 
 pub struct Html {}
