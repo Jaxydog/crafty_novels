@@ -15,34 +15,4 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-use crafty_novels::{export::html::Html, import::stendhal::Stendhal, Export, LexicalTokenizer};
-
-fn main() {
-    test_string_parsing();
-}
-
-fn test_string_parsing() {
-    let input = r#"#- This is the start of the page
-First line
-#- New Page
-Not a #- new page
- #- also not a new page
-
-
-
-Lots of paragraph breaks
-Some §cRED line breaks
-Some §l BOLD line breaks (2)
-Italic:§o text §rreset
-   lots    of   spaces     
-just one space 
-<div>some HTML</div>
-&gt; <== not an <
-& ampersands &
-last line"#;
-
-    let tokens = dbg!(Stendhal::tokenize_string(input).unwrap());
-    let html = Html::export_token_vector_to_string(tokens).unwrap();
-
-    print!("{}", html);
-}
+pub mod stendhal;
