@@ -3,17 +3,17 @@
 version = 3
 
 [[package]]
-name = "cli"
-version = "0.1.0"
-dependencies = [
- "crafty_novels",
-]
-
-[[package]]
 name = "crafty_novels"
 version = "0.1.0"
 dependencies = [
  "thiserror",
+]
+
+[[package]]
+name = "crafty_novels_cli"
+version = "0.1.0"
+dependencies = [
+ "crafty_novels",
 ]
 
 [[package]]

@@ -1,16 +1,22 @@
 [package]
 name = "crafty_novels"
-authors = ["RemasteredArch"]
-license = "AGPL-3.0-or-later"
-repository = "https://github.com/RemasteredArch/ip_geo/"
 version = "0.1.0"
-edition = "2021"
+description = "A library for converting Minecraft books to HTML"
 keywords = ["parser", "html", "minecraft"]
 categories = ["parser-implementations"]
 
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
 
 [workspace]
-members = ["cli"]
+package.authors = ["RemasteredArch"]
+package.repository = "https://github.com/RemasteredArch/ip_geo/"
+package.license = "AGPL-3.0-or-later"
+package.edition = "2021"
+
+members = ["crafty_novels_*"]
 
 [dependencies]
 thiserror = "1.0.63"
