@@ -13,6 +13,7 @@ edition.workspace = true
 [workspace]
 package.authors = ["RemasteredArch"]
 package.repository = "https://github.com/RemasteredArch/ip_geo/"
+package.readme = true
 package.license = "AGPL-3.0-or-later"
 package.edition = "2021"
 

@@ -14,6 +14,28 @@ but it exposes traits necessary to implement arbitrary formats.
 
 - HTML
 
+## Implementations
+
+### [crafty_novels_cli](./crafty_novels_cli)
+
+Currently, only for testing the lib.
+
+In the future, it will handle file/stdin parsing, file/stdout export, and possibly a TUI (similar to the [GUI](#GUI)) using [Ratatui](https://ratatui.rs/).
+
+### crafty_novels_gui
+
+Not yet implemented. Will likely use [Iced](https://iced.rs/) to implement a simple and user-friendly file picker and format selector interface.
+
+## Roadmap
+
+- ~~Basic Stendhal syntax parsing~~
+  - Frontmatter parsing
+- ~~Basic HTML export~~
+  - Frontmatter export
+- CLI
+  - TUI
+- GUI
+
 ## License
 
 crafty_novels is in no way affiliated with Microsoft, Mojang, Minecraft, Stendhal, or NebSpacefarer. All trademarks belong to their respective owners.
