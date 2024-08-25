@@ -50,20 +50,18 @@ impl LexicalTokenizer for Stendhal {
         /// Get a refrence to the next element in `$iter` or return [`Error::UnexpectedEndOfIter`].
         macro_rules! next {
             ($iter:expr) => {
-                &$iter.next().ok_or(Error::UnexpectedEndOfIter)?
+                &$iter.next().ok_or(Error::UnexpectedEndOfIter)??
             };
         }
 
+        let mut iter = BufReader::new(input).lines();
         let mut tokens: Vec<Token> = vec![];
 
-        // How would I make this throw an error at `None` instead of truncating the iterator?
-        let mut iter = BufReader::new(input).lines().map_while(Result::ok);
         let chunk: [&str; 3] = [next!(iter), next!(iter), next!(iter)];
-
         let metadata = parse::frontmatter(&mut chunk.into_iter())?;
 
         for line in iter {
-            parse::line(&mut tokens, &line)?;
+            parse::line(&mut tokens, &line?)?;
         }
 
         Ok(TokenList::new_from_boxed(metadata, tokens.into()))
