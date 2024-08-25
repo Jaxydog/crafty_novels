@@ -25,6 +25,10 @@ pub enum Error {
     MissingFormatCode,
     #[error("no HTML entity associated with character '{0}'")]
     NoSuchCharLiteral(char),
+    #[error("expected iterator to be longer")]
+    UnexpectedEndOfIter,
+    #[error("frontmatter is not present or incomplete")]
+    IncompleteOrMissingFrontmatter,
     #[error("could not perform I/O action")]
     Io(#[from] std::io::Error),
     #[error("could not format item")]

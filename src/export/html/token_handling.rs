@@ -29,6 +29,7 @@ pub fn handle_token(
     match &token {
         Token::Text(s) => insert_string_as_html(output, s)?,
         Token::Format(f) => handle_format(output, format_token_stack, *f)?,
+        Token::Metadata(_) => todo!(),
         Token::Space => write!(output, " ")?,
         Token::LineBreak => write!(output, "<br />")?,
         Token::ParagraphBreak => write!(output, "<br />")?,

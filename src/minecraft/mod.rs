@@ -27,7 +27,7 @@ mod format_code;
 pub use format_code::FormatCode;
 
 /// Represents the ways that Minecraft Java Edition will format text.
-#[derive(Copy, Clone, Debug)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Format {
     Color(Color),
     /// AKA "Magical Text Source", characters should rapidly swap between a set of characters.

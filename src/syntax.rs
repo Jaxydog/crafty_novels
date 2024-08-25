@@ -20,11 +20,12 @@ use crate::minecraft;
 /// A lexical token.
 ///
 /// Represents an abstract representation of text or formatting.
-#[derive(Debug)]
+#[derive(PartialEq, Eq, Debug)]
 pub enum Token {
     Text(Box<str>),
     /// A hidden node to control text formatting.
     Format(minecraft::Format),
+    Metadata(Metadata),
     Space,
     LineBreak,
     ParagraphBreak,
@@ -57,4 +58,11 @@ impl From<&mut Vec<char>> for Token {
     fn from(value: &mut Vec<char>) -> Self {
         Self::Text(value.drain(..).collect::<Box<str>>())
     }
+}
+
+/// Metadata about a literary work.
+#[derive(PartialEq, Eq, Debug)]
+pub enum Metadata {
+    Title(Box<str>),
+    Author(Box<str>),
 }

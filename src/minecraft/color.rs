@@ -23,7 +23,7 @@ use std::fmt::{Display, UpperHex};
 use super::FormatCode;
 
 /// Represents the possible text colors (foreground and background) in Minecraft Java Edition.
-#[derive(Copy, Clone, Debug)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Color {
     Black,
     DarkBlue,

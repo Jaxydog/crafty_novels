@@ -18,7 +18,7 @@
 #![warn(clippy::cargo, clippy::nursery, clippy::pedantic)]
 #![cfg_attr(debug_assertions, allow(clippy::missing_errors_doc))]
 
-use std::{fs::File, io::Write};
+use std::io::{Read, Write};
 
 mod error;
 pub mod export;
@@ -43,5 +43,5 @@ pub trait LexicalTokenizer {
     /// Parse a string into an abstract syntax vector.
     fn tokenize_string(input: &str) -> Result<Vec<Token>, Error>;
     /// Parse a file into an abstract syntax vector.
-    fn tokenize_file(input: File) -> Result<Vec<Token>, Error>;
+    fn tokenize_reader(input: impl Read) -> Result<Vec<Token>, Error>;
 }
