@@ -23,7 +23,7 @@ use crate::{
 use std::str::Lines;
 
 /// Parse a line in the Stendhal format into an abstract syntax vector.
-pub fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
+pub fn line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
     /// Flush the current word stack into a text node.
     fn flush(output: &mut Vec<Token>, word_stack: &mut Vec<char>) {
         if !word_stack.is_empty() {
@@ -36,7 +36,7 @@ pub fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
         return Ok(());
     }
 
-    let line = parse_start_of_page(output, line);
+    let line = start_of_page(output, line);
 
     // Builds a word out of consectutive characters
     let mut word_stack: Vec<char> = vec![];
@@ -90,10 +90,11 @@ pub fn parse_line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
 ///     - [`Error::UnexpectedEndOfIter`]
 /// - The a line does not have the expected field
 ///     - [`Error::IncompleteOrMissingFrontmatter`]
-pub fn parse_frontmatter(output: &mut Vec<Token>, iter: &mut Lines) -> Result<(), Error> {
+pub fn frontmatter(output: &mut Vec<Token>, input: [&str; 3]) -> Result<(), Error> {
     /// Strip the prefix from the next line and return it or return an error.
-    fn get_field<'s>(iter: &'s mut Lines, field: &str) -> Result<&'s str, Error> {
-        iter.next()
+    fn get_field<'s>(input: &'s [&str; 3], index: usize, field: &str) -> Result<&'s str, Error> {
+        input
+            .get(index)
             .ok_or(Error::UnexpectedEndOfIter)?
             .strip_prefix(field)
             .ok_or(Error::IncompleteOrMissingFrontmatter)
@@ -101,24 +102,24 @@ pub fn parse_frontmatter(output: &mut Vec<Token>, iter: &mut Lines) -> Result<()
 
     /// Parse a frontmatter field from `iter` and push the token to `output`, or return an error.
     macro_rules! parse_field {
-        ($field:ident, $field_str:expr) => {
+        ($field:ident, $index:expr, $field_str:expr) => {
             output.push(Token::Metadata(Metadata::$field(
-                get_field(iter, $field_str)?.into(),
+                get_field(&input, $index, $field_str)?.into(),
             )));
         };
     }
 
-    parse_field!(Title, "title: ");
-    parse_field!(Author, "author: ");
+    parse_field!(Title, 0, "title: ");
+    parse_field!(Author, 1, "author: ");
 
-    get_field(iter, "pages:")?; // Should just be an empty string, just need to make sure it's there
+    get_field(&input, 2, "pages:")?; // Should just be an empty string, just need to make sure it's there
 
     Ok(())
 }
 
 /// If a line starts with `"#- "`, push a [`Token::ThematicBreak`] into the output.
 /// Returns the line without the `"#- "`.
-fn parse_start_of_page<'s>(output: &mut Vec<Token>, line: &'s str) -> &'s str {
+fn start_of_page<'s>(output: &mut Vec<Token>, line: &'s str) -> &'s str {
     line.strip_prefix("#- ").map_or(line, |stripped| {
         output.push(Token::ThematicBreak);
         stripped

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-use super::parse::parse_frontmatter;
+use super::parse;
 use crate::{syntax::Metadata, Token};
 
 #[test]
@@ -33,7 +33,7 @@ pages:
         Token::Metadata(Metadata::Author("RemasteredArch".into())),
     ];
 
-    parse_frontmatter(&mut tokens, &mut lines).unwrap();
+    parse::frontmatter(&mut tokens, &mut lines).unwrap();
 
     assert_eq!(lines.next().unwrap(), expected_line);
     assert_eq!(&tokens, &expected_tokens);

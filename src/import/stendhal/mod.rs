@@ -32,24 +32,35 @@ impl LexicalTokenizer for Stendhal {
 
         // Could be recovered by capturing the state of `input` before calling, then reverting on
         // certain errors.
-        parse::parse_frontmatter(&mut vec, &mut input)?;
+        // parse::frontmatter(&mut vec, &mut input)?;
 
         for line in input {
-            parse::parse_line(&mut vec, line)?;
+            parse::line(&mut vec, line)?;
         }
 
         Ok(vec)
     }
 
     /// Parse a file in the Stendhal format into an abstract syntax vector.
-    fn tokenize_reader(input: impl Read) -> Result<Vec<Token>, Error> {
-        let reader = BufReader::new(input);
+    fn tokenize_reader<'s>(input: impl Read) -> Result<Vec<Token>, Error> {
+        let mut iter = BufReader::new(input).lines().map_while(Result::ok);
 
+        #[allow(unused_mut)]
         let mut vec: Vec<Token> = vec![];
 
-        for line in reader.lines() {
-            parse::parse_line(&mut vec, &line?)?;
-        }
+        let chunk: [&str; 3] = [
+            iter.next().ok_or(Error::UnexpectedEndOfIter)?.as_ref(),
+            iter.next().ok_or(Error::UnexpectedEndOfIter)?.as_ref(),
+            iter.next().ok_or(Error::UnexpectedEndOfIter)?.as_ref(),
+        ];
+
+        parse::frontmatter(&mut vec, chunk.iter())?;
+
+        iter.skip(1); // Test if iter is still valid
+
+        /*for line in iter {
+            parse::line(&mut vec, &line?)?;
+        }*/
 
         Ok(vec)
     }
