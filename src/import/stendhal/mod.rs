@@ -32,7 +32,7 @@ impl LexicalTokenizer for Stendhal {
 
         // Could be recovered by capturing the state of `input` before calling, then reverting on
         // certain errors.
-        // parse::frontmatter(&mut vec, &mut input)?;
+        parse::frontmatter(&mut vec, &mut input)?;
 
         for line in input {
             parse::line(&mut vec, line)?;
@@ -43,24 +43,24 @@ impl LexicalTokenizer for Stendhal {
 
     /// Parse a file in the Stendhal format into an abstract syntax vector.
     fn tokenize_reader<'s>(input: impl Read) -> Result<Vec<Token>, Error> {
-        let mut iter = BufReader::new(input).lines().map_while(Result::ok);
+        /// Get a refrence to the next element in `$iter` or return [`Error::UnexpectedEndOfIter`].
+        macro_rules! next {
+            ($iter:expr) => {
+                &$iter.next().ok_or(Error::UnexpectedEndOfIter)?
+            };
+        }
 
-        #[allow(unused_mut)]
         let mut vec: Vec<Token> = vec![];
 
-        let chunk: [&str; 3] = [
-            iter.next().ok_or(Error::UnexpectedEndOfIter)?.as_ref(),
-            iter.next().ok_or(Error::UnexpectedEndOfIter)?.as_ref(),
-            iter.next().ok_or(Error::UnexpectedEndOfIter)?.as_ref(),
-        ];
+        // How would I make this throw an error at `None` instead of truncating the iterator?
+        let mut iter = BufReader::new(input).lines().map_while(Result::ok);
+        let chunk: [&str; 3] = [next!(iter), next!(iter), next!(iter)];
 
-        parse::frontmatter(&mut vec, chunk.iter())?;
+        parse::frontmatter(&mut vec, &mut chunk.into_iter())?;
 
-        iter.skip(1); // Test if iter is still valid
-
-        /*for line in iter {
-            parse::line(&mut vec, &line?)?;
-        }*/
+        for line in iter {
+            parse::line(&mut vec, &line)?;
+        }
 
         Ok(vec)
     }

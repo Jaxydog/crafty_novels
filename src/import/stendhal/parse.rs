@@ -20,7 +20,6 @@ use crate::{
     minecraft::Format,
     syntax::{Metadata, Token},
 };
-use std::str::Lines;
 
 /// Parse a line in the Stendhal format into an abstract syntax vector.
 pub fn line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
@@ -76,25 +75,30 @@ pub fn line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
     Ok(())
 }
 
-/// Parses the metadata about an export into the output.
+/// Parses the metadata about a work into the output.
 ///
 /// # Side effects
 ///
 /// - Pushes data into `output`
-/// - Advances the iterator to the first line after the metadata
+/// - Advances the iterator to the first line after the frontmatter
 ///
 /// # Errors
 ///
-/// Errors if before it finishes parsing the frontmatter:
+/// Errors if, before it finishes parsing the frontmatter,
 /// - The iterator empties
 ///     - [`Error::UnexpectedEndOfIter`]
 /// - The a line does not have the expected field
 ///     - [`Error::IncompleteOrMissingFrontmatter`]
-pub fn frontmatter(output: &mut Vec<Token>, input: [&str; 3]) -> Result<(), Error> {
-    /// Strip the prefix from the next line and return it or return an error.
-    fn get_field<'s>(input: &'s [&str; 3], index: usize, field: &str) -> Result<&'s str, Error> {
-        input
-            .get(index)
+pub fn frontmatter<'s>(
+    output: &mut Vec<Token>,
+    iter: &mut impl Iterator<Item = &'s str>,
+) -> Result<(), Error> {
+    /// Strip the prefix from the next line and return it or an error.
+    fn get_field<'s>(
+        iter: &mut impl Iterator<Item = &'s str>,
+        field: &str,
+    ) -> Result<&'s str, Error> {
+        iter.next()
             .ok_or(Error::UnexpectedEndOfIter)?
             .strip_prefix(field)
             .ok_or(Error::IncompleteOrMissingFrontmatter)
@@ -102,17 +106,17 @@ pub fn frontmatter(output: &mut Vec<Token>, input: [&str; 3]) -> Result<(), Erro
 
     /// Parse a frontmatter field from `iter` and push the token to `output`, or return an error.
     macro_rules! parse_field {
-        ($field:ident, $index:expr, $field_str:expr) => {
+        ($field:ident, $field_str:expr) => {
             output.push(Token::Metadata(Metadata::$field(
-                get_field(&input, $index, $field_str)?.into(),
+                get_field(iter, $field_str)?.into(),
             )));
         };
     }
 
-    parse_field!(Title, 0, "title: ");
-    parse_field!(Author, 1, "author: ");
+    parse_field!(Title, "title: ");
+    parse_field!(Author, "author: ");
 
-    get_field(&input, 2, "pages:")?; // Should just be an empty string, just need to make sure it's there
+    get_field(iter, "pages:")?; // Should just be an empty string, just need to make sure it's there
 
     Ok(())
 }
