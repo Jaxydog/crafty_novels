@@ -29,9 +29,9 @@ Not yet implemented. Will likely use [Iced](https://iced.rs/) to implement a sim
 ## Roadmap
 
 - ~~Basic Stendhal syntax parsing~~
-  - Frontmatter parsing
+  - ~~Frontmatter parsing~~
 - ~~Basic HTML export~~
-  - Frontmatter export
+  - ~~Frontmatter export~~
 - CLI
   - TUI
 - GUI
