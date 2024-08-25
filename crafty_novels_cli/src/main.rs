@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+#![warn(clippy::cargo, clippy::nursery, clippy::pedantic)]
+#![cfg_attr(debug_assertions, allow(clippy::missing_errors_doc))]
+
 use crafty_novels::{export::html::Html, import::stendhal::Stendhal, Export, LexicalTokenizer};
 
 fn main() {
@@ -22,7 +25,10 @@ fn main() {
 }
 
 fn test_string_parsing() {
-    let input = r#"#- This is the start of the page
+    let input = r"title: crafty_novels
+author: RemasteredArch
+pages:
+#- This is the start of the page
 First line
 #- New Page
 Not a #- new page
@@ -39,10 +45,10 @@ just one space
 <div>some HTML</div>
 &gt; <== not an <
 & ampersands &
-last line"#;
+last line";
 
     let tokens = dbg!(Stendhal::tokenize_string(input).unwrap());
     let html = Html::export_token_vector_to_string(tokens).unwrap();
 
-    print!("{}", html);
+    print!("{html}");
 }
