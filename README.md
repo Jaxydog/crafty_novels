@@ -24,7 +24,8 @@ In the future, it will handle file/stdin parsing, file/stdout export, and possib
 
 ### crafty_novels_gui
 
-Not yet implemented. Will likely use [Iced](https://iced.rs/) to implement a simple and user-friendly file picker and format selector interface.
+Not yet implemented.
+Will likely use [Iced](https://iced.rs/) to implement a simple and user-friendly file picker and format selector interface.
 
 ## Roadmap
 
@@ -40,7 +41,8 @@ Not yet implemented. Will likely use [Iced](https://iced.rs/) to implement a sim
       [C-EXAMPLE](https://rust-lang.github.io/api-guidelines/documentation.html#all-items-have-a-rustdoc-example-c-example)
     - Examples use `?`, not `unwrap`\
       [C-QUESTION-MARK](https://rust-lang.github.io/api-guidelines/documentation.html#examples-use--not-try-not-unwrap-c-question-mark)
-    - Documentation of errors `Result` functions and other failures (including for traits)\
+    - Documentation of errors from `Result` functions
+      and other failures (including for traits)\
       [C-FAILURE](https://rust-lang.github.io/api-guidelines/documentation.html#function-docs-include-error-panic-and-safety-considerations-c-failure)
     - Frequently use of links in doc comments\
       [C-LINK](https://rust-lang.github.io/api-guidelines/documentation.html#prose-contains-hyperlinks-to-relevant-things-c-link)
@@ -94,7 +96,8 @@ Not yet implemented. Will likely use [Iced](https://iced.rs/) to implement a sim
 
 ## License
 
-crafty_novels is in no way affiliated with Microsoft, Mojang, Minecraft, Stendhal, or NebSpacefarer. All trademarks belong to their respective owners.
+crafty_novels is in no way affiliated with Microsoft, Mojang, Minecraft, Stendhal, or NebSpacefarer.
+All trademarks belong to their respective owners.
 
 crafty_novels is licensed under the GNU Affero General Public License version 3, or (at your option) any later version.
 You should have received a copy of the GNU Affero General Public License along with crafty_novels, found in [LICENSE](./LICENSE).
