@@ -167,12 +167,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_parse() {
-        fn slice_eq<E: PartialEq>(a: &[E], b: &[E]) -> bool {
-            // Compare length contents
-            a.len() == b.len() && a.iter().zip(b).any(|p| p.0 != p.1)
-        }
-
+    fn test_parse_frontmatter() {
         let mut lines = "title: crafty_novels
 author: RemasteredArch
 pages:
@@ -186,10 +181,9 @@ pages:
             Token::Metadata(Metadata::Author("RemasteredArch".into())),
         ];
 
-        parse_frontmatter(&mut tokens, &mut lines);
+        parse_frontmatter(&mut tokens, &mut lines).unwrap();
 
-        assert_eq!(lines.next(), Some(expected_line));
-
-        assert!(slice_eq(&tokens, &expected_tokens));
+        assert_eq!(lines.next().unwrap(), expected_line);
+        assert_eq!(&tokens, &expected_tokens);
     }
 }
