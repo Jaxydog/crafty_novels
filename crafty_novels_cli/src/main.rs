@@ -18,7 +18,7 @@
 #![warn(clippy::cargo, clippy::nursery, clippy::pedantic)]
 #![cfg_attr(debug_assertions, allow(clippy::missing_errors_doc))]
 
-use crafty_novels::{export::html::Html, import::stendhal::Stendhal, Export, LexicalTokenizer};
+use crafty_novels::{export::Html, import::Stendhal, Export, LexicalTokenizer};
 
 fn main() {
     test_string_parsing();
