@@ -89,10 +89,7 @@ pub fn line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
 ///     - [`Error::UnexpectedEndOfIter`]
 /// - The a line does not have the expected field
 ///     - [`Error::IncompleteOrMissingFrontmatter`]
-pub fn frontmatter<'s>(
-    output: &mut Vec<Token>,
-    iter: &mut impl Iterator<Item = &'s str>,
-) -> Result<(), Error> {
+pub fn frontmatter<'s>(iter: &mut impl Iterator<Item = &'s str>) -> Result<Box<[Metadata]>, Error> {
     /// Strip the prefix from the next line and return it or an error.
     fn get_field<'s>(
         iter: &mut impl Iterator<Item = &'s str>,
@@ -104,21 +101,20 @@ pub fn frontmatter<'s>(
             .ok_or(Error::IncompleteOrMissingFrontmatter)
     }
 
+    let mut output: Vec<Metadata> = vec![];
+
     /// Parse a frontmatter field from `iter` and push the token to `output`, or return an error.
     macro_rules! parse_field {
         ($field:ident, $field_str:expr) => {
-            output.push(Token::Metadata(Metadata::$field(
-                get_field(iter, $field_str)?.into(),
-            )));
+            output.push(Metadata::$field(get_field(iter, $field_str)?.into()));
         };
     }
 
     parse_field!(Title, "title: ");
     parse_field!(Author, "author: ");
-
     get_field(iter, "pages:")?; // Should just be an empty string, just need to make sure it's there
 
-    Ok(())
+    Ok(output.into())
 }
 
 /// If a line starts with `"#- "`, push a [`Token::ThematicBreak`] into the output.

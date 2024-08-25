@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{error::Error, minecraft::Format, syntax::Token, Export};
+use crate::{error::Error, minecraft::Format, syntax::TokenList, Export};
 use std::io::{BufWriter, Write};
 
 mod syntax;
@@ -27,7 +27,7 @@ pub struct Html {}
 
 impl Export for Html {
     /// Parse a given abstract syntax vector into HTML, then output that as a string.
-    fn export_token_vector_to_string(tokens: Vec<Token>) -> Result<Box<str>, Error> {
+    fn export_token_vector_to_string(tokens: TokenList) -> Result<Box<str>, Error> {
         let mut bytes: Vec<u8> = vec![];
 
         Self::export_token_vector_to_writer(tokens, &mut bytes)?;
@@ -41,24 +41,26 @@ impl Export for Html {
     /// Parse a given abstract syntax vector into HTML, then output that into a writer, like a
     /// [`std::fs::File`].
     fn export_token_vector_to_writer(
-        tokens: Vec<Token>,
+        tokens: TokenList,
         output: &mut impl Write,
     ) -> Result<(), Error> {
         let mut writer = BufWriter::new(output);
 
+        token_handling::start_document(&mut writer, tokens.metadata())?;
+
         // Most readable
-        write!(writer, "<article style=white-space:break-spaces>")?;
+        write!(writer, "<body><article style=white-space:break-spaces>")?;
 
         // Most accurate
         // Does, however, still consume spaces that break, which Minecraft books do not
         // write!(writer, "<article style=line-break:anywhere>");
 
         let mut format_token_stack: Vec<Format> = vec![];
-        for token in tokens {
-            handle_token(&mut writer, &mut format_token_stack, &token)?;
+        for token in tokens.tokens() {
+            handle_token(&mut writer, &mut format_token_stack, token)?;
         }
 
-        write!(writer, "</article>")?;
+        write!(writer, "</article></body></html>")?;
 
         writer.flush()?;
         Ok(())

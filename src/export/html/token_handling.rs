@@ -16,7 +16,11 @@
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
 use super::syntax::HtmlEntity;
-use crate::{error::Error, minecraft::Format, syntax::Token};
+use crate::{
+    error::Error,
+    minecraft::Format,
+    syntax::{Metadata, Token},
+};
 use std::io::{BufWriter, Write};
 
 /// Push the appropriate HTML element(s) for `token` into `output`.
@@ -29,7 +33,6 @@ pub fn handle_token(
     match &token {
         Token::Text(s) => insert_string_as_html(output, s)?,
         Token::Format(f) => handle_format(output, format_token_stack, *f)?,
-        Token::Metadata(_) => todo!(),
         Token::Space => write!(output, " ")?,
         Token::LineBreak => write!(output, "<br />")?,
         Token::ParagraphBreak => write!(output, "<br />")?,
@@ -143,6 +146,32 @@ fn close_formatting_tags(
             Italic => "</i>";
         );
     }
+
+    Ok(())
+}
+
+/// With the given [`Metadata`], write some HTML boilerplate, inlcuding `"<head>....</head>"` to
+/// `output`.
+pub fn start_document(
+    output: &mut BufWriter<impl Write>,
+    metadata: &[Metadata],
+) -> Result<(), Error> {
+    write!(
+        output,
+        r#"<!DOCTYPE html><html lang="en" dir="ltr"><head><meta charset="utf-8" />"#
+    )?;
+
+    for data in metadata {
+        match data {
+            Metadata::Title(t) => write!(output, r#"<title>{t}</title>"#)?,
+            Metadata::Author(a) => write!(output, r#"<meta name="author" content="{a}" />"#)?,
+        }
+    }
+
+    write!(
+        output,
+        r#"<meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>"#
+    )?;
 
     Ok(())
 }

@@ -15,7 +15,36 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+use std::sync::Arc;
+
 use crate::minecraft;
+
+#[derive(Debug)]
+pub struct TokenList {
+    metadata: Arc<[Metadata]>,
+    tokens: Arc<[Token]>,
+}
+
+impl TokenList {
+    pub const fn new(metadata: Arc<[Metadata]>, tokens: Arc<[Token]>) -> Self {
+        Self { metadata, tokens }
+    }
+
+    pub fn new_from_boxed(metadata: Box<[Metadata]>, tokens: Box<[Token]>) -> Self {
+        Self {
+            metadata: metadata.into(),
+            tokens: tokens.into(),
+        }
+    }
+
+    pub fn metadata(&self) -> &[Metadata] {
+        &self.metadata
+    }
+
+    pub fn tokens(&self) -> &[Token] {
+        &self.tokens
+    }
+}
 
 /// A lexical token.
 ///
@@ -25,7 +54,6 @@ pub enum Token {
     Text(Box<str>),
     /// A hidden node to control text formatting.
     Format(minecraft::Format),
-    Metadata(Metadata),
     Space,
     LineBreak,
     ParagraphBreak,

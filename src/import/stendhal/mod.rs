@@ -15,7 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{error::Error, syntax::Token, LexicalTokenizer};
+use crate::{
+    error::Error,
+    syntax::{Token, TokenList},
+    LexicalTokenizer,
+};
 use std::io::{BufRead, BufReader, Read};
 
 mod parse;
@@ -26,23 +30,23 @@ pub struct Stendhal;
 
 impl LexicalTokenizer for Stendhal {
     /// Parse a string in the Stendhal format into an abstract syntax vector.
-    fn tokenize_string(input: &str) -> Result<Vec<Token>, Error> {
+    fn tokenize_string(input: &str) -> Result<TokenList, Error> {
         let mut input = input.lines();
-        let mut vec: Vec<Token> = vec![];
+        let mut tokens: Vec<Token> = vec![];
 
         // Could be recovered by capturing the state of `input` before calling, then reverting on
         // certain errors.
-        parse::frontmatter(&mut vec, &mut input)?;
+        let metadata = parse::frontmatter(&mut input)?;
 
         for line in input {
-            parse::line(&mut vec, line)?;
+            parse::line(&mut tokens, line)?;
         }
 
-        Ok(vec)
+        Ok(TokenList::new_from_boxed(metadata, tokens.into()))
     }
 
     /// Parse a file in the Stendhal format into an abstract syntax vector.
-    fn tokenize_reader<'s>(input: impl Read) -> Result<Vec<Token>, Error> {
+    fn tokenize_reader(input: impl Read) -> Result<TokenList, Error> {
         /// Get a refrence to the next element in `$iter` or return [`Error::UnexpectedEndOfIter`].
         macro_rules! next {
             ($iter:expr) => {
@@ -50,18 +54,18 @@ impl LexicalTokenizer for Stendhal {
             };
         }
 
-        let mut vec: Vec<Token> = vec![];
+        let mut tokens: Vec<Token> = vec![];
 
         // How would I make this throw an error at `None` instead of truncating the iterator?
         let mut iter = BufReader::new(input).lines().map_while(Result::ok);
         let chunk: [&str; 3] = [next!(iter), next!(iter), next!(iter)];
 
-        parse::frontmatter(&mut vec, &mut chunk.into_iter())?;
+        let metadata = parse::frontmatter(&mut chunk.into_iter())?;
 
         for line in iter {
-            parse::line(&mut vec, &line)?;
+            parse::line(&mut tokens, &line)?;
         }
 
-        Ok(vec)
+        Ok(TokenList::new_from_boxed(metadata, tokens.into()))
     }
 }

@@ -27,21 +27,21 @@ mod minecraft;
 mod syntax;
 
 use error::Error;
-use syntax::Token;
+use syntax::TokenList;
 
 pub trait Export {
     /// Parse a given abstract syntax vector into a certain format, then output that as a string.
-    fn export_token_vector_to_string(tokens: Vec<Token>) -> Result<Box<str>, Error>;
+    fn export_token_vector_to_string(tokens: TokenList) -> Result<Box<str>, Error>;
     /// Parse a given abstract syntax vector into a certain format, writing the result into `output`.
     fn export_token_vector_to_writer(
-        tokens: Vec<Token>,
+        tokens: TokenList,
         output: &mut impl Write,
     ) -> Result<(), Error>;
 }
 
 pub trait LexicalTokenizer {
     /// Parse a string into an abstract syntax vector.
-    fn tokenize_string(input: &str) -> Result<Vec<Token>, Error>;
+    fn tokenize_string(input: &str) -> Result<TokenList, Error>;
     /// Parse a file into an abstract syntax vector.
-    fn tokenize_reader(input: impl Read) -> Result<Vec<Token>, Error>;
+    fn tokenize_reader(input: impl Read) -> Result<TokenList, Error>;
 }

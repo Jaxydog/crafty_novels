@@ -16,7 +16,7 @@
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
 use super::parse;
-use crate::{syntax::Metadata, Token};
+use crate::syntax::Metadata;
 
 #[test]
 fn test_parse_frontmatter() {
@@ -25,16 +25,15 @@ author: RemasteredArch
 pages:
 #- The text of the book"
         .lines();
-    let mut tokens = vec![];
-
     let expected_line = "#- The text of the book";
-    let expected_tokens = [
-        Token::Metadata(Metadata::Title("crafty_novels".into())),
-        Token::Metadata(Metadata::Author("RemasteredArch".into())),
-    ];
+    let expected_metadata: Box<[Metadata]> = [
+        Metadata::Title("crafty_novels".into()),
+        Metadata::Author("RemasteredArch".into()),
+    ]
+    .into();
 
-    parse::frontmatter(&mut tokens, &mut lines).unwrap();
+    let metadata = parse::frontmatter(&mut lines).unwrap();
 
     assert_eq!(lines.next().unwrap(), expected_line);
-    assert_eq!(&tokens, &expected_tokens);
+    assert_eq!(metadata, expected_metadata);
 }
