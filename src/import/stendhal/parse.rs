@@ -17,8 +17,7 @@
 
 use crate::{
     error::Error,
-    minecraft::Format,
-    syntax::{Metadata, Token},
+    syntax::{minecraft::Format, Metadata, Token},
 };
 
 /// Parse a line in the Stendhal format into an abstract syntax vector.

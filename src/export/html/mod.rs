@@ -15,7 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{error::Error, minecraft::Format, syntax::TokenList, Export};
+use crate::{
+    error::Error,
+    syntax::{minecraft::Format, TokenList},
+    Export,
+};
 use std::io::{BufWriter, Write};
 
 mod syntax;

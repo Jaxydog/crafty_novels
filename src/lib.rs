@@ -23,7 +23,6 @@ use std::io::{Read, Write};
 mod error;
 pub mod export;
 pub mod import;
-mod minecraft;
 mod syntax;
 
 use error::Error;

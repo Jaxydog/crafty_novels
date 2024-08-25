@@ -17,7 +17,7 @@
 
 use std::sync::Arc;
 
-use crate::minecraft;
+pub mod minecraft;
 
 #[derive(Debug)]
 pub struct TokenList {

@@ -18,9 +18,8 @@
 #![allow(clippy::too_many_lines)]
 #![warn(clippy::non_ascii_literal)]
 
-use std::fmt::Display;
-
 use crate::error::Error;
+use std::fmt::Display;
 
 /// An HTML entity.
 ///

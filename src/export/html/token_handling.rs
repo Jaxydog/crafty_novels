@@ -18,8 +18,7 @@
 use super::syntax::HtmlEntity;
 use crate::{
     error::Error,
-    minecraft::Format,
-    syntax::{Metadata, Token},
+    syntax::{minecraft::Format, Metadata, Token},
 };
 use std::io::{BufWriter, Write};
 
