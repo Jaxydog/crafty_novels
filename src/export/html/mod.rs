@@ -50,7 +50,7 @@ impl Export for Html {
     ) -> Result<(), Error> {
         let mut writer = BufWriter::new(output);
 
-        token_handling::start_document(&mut writer, tokens.metadata())?;
+        token_handling::start_document(&mut writer, tokens.metadata_as_slice())?;
 
         // Most readable
         write!(writer, "<body><article style=white-space:break-spaces>")?;
@@ -60,7 +60,7 @@ impl Export for Html {
         // write!(writer, "<article style=line-break:anywhere>");
 
         let mut format_token_stack: Vec<Format> = vec![];
-        for token in tokens.tokens() {
+        for token in tokens.tokens_as_slice() {
             handle_token(&mut writer, &mut format_token_stack, token)?;
         }
 

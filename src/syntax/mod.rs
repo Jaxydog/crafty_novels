@@ -19,7 +19,7 @@ use std::sync::Arc;
 
 pub mod minecraft;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TokenList {
     metadata: Arc<[Metadata]>,
     tokens: Arc<[Token]>,
@@ -37,12 +37,20 @@ impl TokenList {
         }
     }
 
-    pub fn metadata(&self) -> &[Metadata] {
+    pub fn metadata_as_slice(&self) -> &[Metadata] {
         &self.metadata
     }
 
-    pub fn tokens(&self) -> &[Token] {
+    pub fn tokens_as_slice(&self) -> &[Token] {
         &self.tokens
+    }
+
+    pub fn metadata(&self) -> Arc<[Metadata]> {
+        self.metadata.clone()
+    }
+
+    pub fn tokens(&self) -> Arc<[Token]> {
+        self.tokens.clone()
     }
 }
 
