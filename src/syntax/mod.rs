@@ -15,21 +15,33 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+//! Syntax definitions for the crate.
+//!
+//! Defines the intermediary representations of documents, and some of the parsing necessary to
+//! create it.
+//!
+//! See [`TokenList`].
+
 use std::sync::Arc;
 
 pub mod minecraft;
 
+/// Represents and entire work in abstract syntax.
 #[derive(Debug, Clone)]
 pub struct TokenList {
+    /// Meta information about the work.
     metadata: Arc<[Metadata]>,
+    /// The syntactical representation of the content of the work.
     tokens: Arc<[Token]>,
 }
 
 impl TokenList {
+    /// Creates a new [`TokenList`].
     pub const fn new(metadata: Arc<[Metadata]>, tokens: Arc<[Token]>) -> Self {
         Self { metadata, tokens }
     }
 
+    /// Creates a new [`TokenList`] by consuming `Box`es.
     pub fn new_from_boxed(metadata: Box<[Metadata]>, tokens: Box<[Token]>) -> Self {
         Self {
             metadata: metadata.into(),
@@ -37,18 +49,22 @@ impl TokenList {
         }
     }
 
+    /// Returns a shared reference to the internal [`Metadata`] slice.
     pub fn metadata_as_slice(&self) -> &[Metadata] {
         &self.metadata
     }
 
+    /// Returns a shared reference to the internal [`Token`] slice.
     pub fn tokens_as_slice(&self) -> &[Token] {
         &self.tokens
     }
 
+    /// Returns a copy of the internal [`Arc`] holding a [`Metadata`] slice.
     pub fn metadata(&self) -> Arc<[Metadata]> {
         self.metadata.clone()
     }
 
+    /// Returns a copy of the internal [`Arc`] holding a [`Token`] slice.
     pub fn tokens(&self) -> Arc<[Token]> {
         self.tokens.clone()
     }
@@ -56,16 +72,22 @@ impl TokenList {
 
 /// A lexical token.
 ///
-/// Represents an abstract representation of text or formatting.
+/// Represents an abstract representation of the text, formatting, structure, etc. of a document.
 #[derive(PartialEq, Eq, Debug)]
 pub enum Token {
+    /// Represents a string of plain text in the document.
     Text(Box<str>),
-    /// A hidden node to control text formatting.
+    /// A hidden node to control the text formatting of the document.
     Format(minecraft::Format),
+    /// Reprents a literal space (`' '`).
     Space,
+    /// Represents a line break, such as `'\n'` or `"\r\n"`.
     LineBreak,
+    /// Represents the space between paragraphs.
     ParagraphBreak,
-    /// A page break.
+    /// Represents the space between sections of a document.
+    ///
+    /// Typically used to represent page breaks or topic shifts.
     ThematicBreak,
 }
 
@@ -90,7 +112,7 @@ impl Token {
 }
 
 impl From<&mut Vec<char>> for Token {
-    /// Drain a [`Vec<char>`] to build a text node.
+    /// Empty a [`Vec<char>`] and build a [`Token::Text`] with its contents.
     fn from(value: &mut Vec<char>) -> Self {
         Self::Text(value.drain(..).collect::<Box<str>>())
     }

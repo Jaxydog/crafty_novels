@@ -16,6 +16,11 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+//! The mechanisms to convert between text representations and syntactical representations of
+//! [`Format`].
+//!
+//! See [`FormatCode`].
+
 use super::{Color, Format};
 use crate::Error;
 use std::{fmt::Display, str::FromStr};
@@ -33,7 +38,7 @@ impl FormatCode {
         Self(code)
     }
 
-    /// Returns the inner character.
+    /// Returns the inner [`char`].
     pub const fn get(self) -> char {
         self.0
     }
@@ -53,6 +58,11 @@ impl FromStr for FormatCode {
     /// Expects a two byte string that starts with `'§'`.
     ///
     /// Ex. The `'0'` in `"§0"`.
+    ///
+    /// # Errors
+    ///
+    /// - [`Error::InvalidFormatCodeString`] if passed a string that is longer than two [`char`]s
+    ///   or does not start with `'§'`
     fn from_str(string: &str) -> Result<Self, Self::Err> {
         if !(string.starts_with('§') && string.chars().count() == 2) {
             return Err(Error::InvalidFormatCodeString(string.to_string()));
@@ -84,7 +94,7 @@ impl From<FormatCode> for char {
 impl From<Format> for FormatCode {
     /// Returns a [`Format`]'s associated [`FormatCode`].
     ///
-    /// Looks up the code against Minecraft Java Edition's list of formatting codes.
+    /// Looks up the code against Minecraft: Java Edition's list of formatting codes.
     fn from(value: Format) -> Self {
         /// Match the input [`Format`] to a [`FormatCode`] value.
         ///

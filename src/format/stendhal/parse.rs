@@ -15,12 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+//! The actual, under the hood, line-by-line parsing for the [Stendhal][`super::Stendhal`] format.
+
 use crate::{
     error::Error,
     syntax::{minecraft::Format, Metadata, Token},
 };
 
 /// Parse a line in the Stendhal format into an abstract syntax vector.
+///
+/// If a line is empty, it is considered a paragraph break.
+///
+/// # Errors
+///
+/// - [`Error::MissingFormatCode`] if `'§'` isn't followed by another character
+/// - [`Error::NoSuchFormatCode`] if `'§'` isn't followed by a valid [`Format`] character
 pub fn line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
     /// Flush the current word stack into a text node.
     fn flush(output: &mut Vec<Token>, word_stack: &mut Vec<char>) {
@@ -65,7 +74,9 @@ pub fn line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
             _ => word_stack.push(char),
         }
     }
+
     flush(output, &mut word_stack);
+
     if trailing_formatting {
         output.push(Token::Format(Format::Reset));
     }

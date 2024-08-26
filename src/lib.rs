@@ -15,6 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+//! `crafty_novels` is a library for converting text formats.
+//!
+//! Intended for converting Minecraft: Java Edition books to HTML, but this module contains the
+//! traits necessary to implement your own importers or exports.
+//!
+//! # How it works
+//!
+//! Structs that implement [`LexicalTokenizer`] take input in their format, parse it, and return a
+//! [`TokenList`].
+//! Structs that implement [`Export`] take that [`TokenList`], convert it to their format, and
+//! write that to the output.
+//!
+//! Built-in implementations can be found in [`import`] and [`export`].
+
 #![warn(clippy::cargo, clippy::nursery, clippy::pedantic)]
 #![cfg_attr(debug_assertions, allow(clippy::missing_errors_doc))]
 
@@ -28,6 +42,12 @@ mod syntax;
 
 use error::Error;
 use syntax::TokenList;
+
+// These could return better errors -- exporting to string never error, exporting to `impl Write`
+// should only error on `std::io::Error`.
+//
+// Similarly, `LexicalTokenizer` could do with a `impl std::error::Error` (maybe something to do
+// with `std::io::Error` also?) so that implementation is more flexible.
 
 pub trait Export {
     /// Parse a given abstract syntax vector into a certain format, then output that as a string.

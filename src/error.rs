@@ -15,6 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+//! Error definitions for the crate.
+//!
+//! See [`Error`].
+
+use crate::syntax::Token;
+
+/// Represents the various possible errors for the crate.
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("expected a two character string starting with §, received '{0}'")]
@@ -29,6 +36,8 @@ pub enum Error {
     UnexpectedEndOfIter,
     #[error("frontmatter is not present or incomplete")]
     IncompleteOrMissingFrontmatter,
+    #[error("did not expect token")]
+    UnexpectedToken(Token),
     #[error("could not perform I/O action")]
     Io(#[from] std::io::Error),
     #[error("could not format item")]

@@ -15,5 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+//! Holds the implementations for various formats.
+//!
+//! This module should never be public. Instead, these modules' implementations should be
+//! re-exported under [`crate::import`] and [`crate::export`].
+
 pub mod html;
 pub mod stendhal;

@@ -16,13 +16,16 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+//! Syntax definitions for Minecraft text coloring.
+//!
+//! See [`Color`] and [`ColorValue`].
+
 #![allow(clippy::module_name_repetitions)]
 
+use super::FormatCode;
 use std::fmt::{Display, UpperHex};
 
-use super::FormatCode;
-
-/// Represents the possible text colors (foreground and background) in Minecraft Java Edition.
+/// Represents the possible text colors (foreground and background) in Minecraft: Java Edition.
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Color {
     Black,
@@ -44,7 +47,7 @@ pub enum Color {
 }
 
 impl From<Color> for ColorValue {
-    /// Get the values associated with a given [`Color`] in Minecraft Java Edition.
+    /// Get the values associated with a given [`Color`] in Minecraft: Java Edition.
     fn from(color: Color) -> Self {
         /// Match the input [`Color`] to a hardcoded [`ColorValue`].
         macro_rules! color_match {

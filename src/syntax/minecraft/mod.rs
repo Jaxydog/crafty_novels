@@ -16,8 +16,11 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::error::Error;
+//! Syntax definitions for Minecraft: Java Edition text.
+//!
+//! See [`Format`].
 
+use crate::error::Error;
 use std::str::FromStr;
 
 mod color;
@@ -26,7 +29,7 @@ pub use color::{Color, ColorTuple, ColorValue};
 mod format_code;
 pub use format_code::FormatCode;
 
-/// Represents the ways that Minecraft Java Edition will format text.
+/// Represents the ways that Minecraft: Java Edition will format text.
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Format {
     Color(Color),
@@ -42,6 +45,12 @@ pub enum Format {
 impl TryFrom<char> for Format {
     type Error = Error;
 
+    /// Match a format code to a [`Format`] variant.
+    ///
+    /// # Errors
+    ///
+    /// - [`Error::NoSuchFormatCode`] if the [`FormatCode`] does not correspond to a variant of
+    ///   [`Format`]
     fn try_from(value: char) -> Result<Self, Self::Error> {
         Self::try_from(FormatCode::new(value))
     }
@@ -50,7 +59,12 @@ impl TryFrom<char> for Format {
 impl TryFrom<FormatCode> for Format {
     type Error = Error;
 
-    /// Look up a [`code`][Self::code] against Minecraft Java Edition's list of formatting codes.
+    /// Look up a [`FormatCode`] against Minecraft: Java Edition's list of formatting codes.
+    ///
+    /// # Errors
+    ///
+    /// - [`Error::NoSuchFormatCode`] if the [`FormatCode`] does not correspond to a variant of
+    ///   [`Format`]
     fn try_from(code: FormatCode) -> Result<Self, Self::Error> {
         /// Match the input [`FormatCode`] to a [`Format`] Value.
         ///
@@ -104,6 +118,13 @@ impl FromStr for Format {
     /// Expects a two byte string that starts with `'§'`.
     ///
     /// Ex. The `'0'` in `"§0"`.
+    ///
+    /// # Errors
+    ///
+    /// - [`Error::InvalidFormatCodeString`] if passed a string that is longer than two [`char`]s
+    ///   or does not start with `'§'`
+    /// - [`Error::NoSuchFormatCode`] if the [`FormatCode`] does not correspond to a variant of
+    ///   [`Format`]
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Self::try_from(FormatCode::from_str(s)?)
     }

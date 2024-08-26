@@ -15,4 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+//! Implementations of [`LexicalTokenizer`][`crate::LexicalTokenizer`].
+
 pub use crate::format::stendhal::Stendhal;

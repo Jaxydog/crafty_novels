@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+//! The actual, under the hood, token-by-token exporting for the [HTML][`super::Html`] format.
+
 use super::syntax::HtmlEntity;
 use crate::{
     error::Error,
@@ -24,6 +26,14 @@ use std::io::{BufWriter, Write};
 
 /// Push the appropriate HTML element(s) for `token` into `output`.
 /// If `token` is [`Token::Format`], it is pushed onto `format_token_stack`.
+///
+/// # Errors
+///
+/// - [`Error::UnexpectedToken`] if `format_token_stack` contains [`Format::Reset`] and
+///   `token` is of variant [`Format::Reset`]
+///   - [`handle_token`] itself cannot cause this state, but assumes that the owner of
+///     `format_token_stack` could have done it
+/// - [`Error::Io`] if it cannot write into `output`
 pub fn handle_token(
     output: &mut BufWriter<impl Write>,
     format_token_stack: &mut Vec<Format>,
@@ -47,6 +57,10 @@ pub fn handle_token(
 ///
 /// - If a literal character corresponds to an [`HtmlEntity`], write that entity into `output`
 /// - Otherwise, write the character to `output`
+///
+/// # Errors
+///
+/// - [`Error::Io`] if it cannot write into `output`
 fn insert_string_as_html(output: &mut BufWriter<impl Write>, input: &str) -> Result<(), Error> {
     for char in input.chars() {
         if let Ok(as_html_entity) = HtmlEntity::try_from(&char) {
@@ -63,6 +77,14 @@ fn insert_string_as_html(output: &mut BufWriter<impl Write>, input: &str) -> Res
 /// Pushes the `format_token` onto `format_token_stack`.
 ///
 /// If it hits [`Format::Reset`], it will call [`close_formatting_tags`].
+///
+/// # Errors
+///
+/// - [`Error::UnexpectedToken`] if `format_token_stack` contains [`Format::Reset`] and
+///   `format_token` is of variant [`Format::Reset`]
+///   - [`handle_format`] itself cannot cause this state, but assumes that the owner of
+///     `format_token_stack` could have done it
+/// - [`Error::Io`] if it cannot write into `output`
 fn handle_format(
     output: &mut BufWriter<impl Write>,
     format_token_stack: &mut Vec<Format>,
@@ -112,6 +134,11 @@ fn handle_format(
 }
 
 /// Closes all the HTML elements opened in [`handle_format`] by the tokens in `format_token_stack`.
+///
+/// # Errors
+///
+/// - [`Error::UnexpectedToken`] if `format_token_stack` contains [`Format::Reset`]
+/// - [`Error::Io`] if it cannot write into `output`
 fn close_formatting_tags(
     output: &mut BufWriter<impl Write>,
     format_token_stack: &mut Vec<Format>,
@@ -129,7 +156,7 @@ fn close_formatting_tags(
                 $(
                     Format::$format => write!($output, $html)?
                 ),+ ,
-                Format::Reset => unreachable!(),
+                Format::Reset => return Err(Error::UnexpectedToken(Token::Format(Format::Reset))),
             }
         };
     }
@@ -151,10 +178,15 @@ fn close_formatting_tags(
 
 /// With the given [`Metadata`], write some HTML boilerplate, inlcuding `"<head>....</head>"` to
 /// `output`.
+///
+/// # Errors
+///
+/// - [`Error::Io`] if it cannot write into `output`
 pub fn start_document(
     output: &mut BufWriter<impl Write>,
     metadata: &[Metadata],
 ) -> Result<(), Error> {
+    // Should this really be assuming English and LTR text?
     write!(
         output,
         r#"<!DOCTYPE html><html lang="en" dir="ltr"><head><meta charset="utf-8" />"#
@@ -162,6 +194,7 @@ pub fn start_document(
 
     for data in metadata {
         match data {
+            // These should be using [`write_string_as_html`]
             Metadata::Title(t) => write!(output, r#"<title>{t}</title>"#)?,
             Metadata::Author(a) => write!(output, r#"<meta name="author" content="{a}" />"#)?,
         }

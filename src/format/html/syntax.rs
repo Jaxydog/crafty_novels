@@ -15,6 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
+//! Syntax definitions for the [HTML][`super::Html`] format.
+//!
+//! Responsible for [`HtmlEntity`], [`HtmlEntityValue`], and the accompanying conversions.
+
 #![allow(clippy::too_many_lines)]
 #![warn(clippy::non_ascii_literal)]
 
@@ -590,6 +594,10 @@ impl TryFrom<char> for HtmlEntity {
     type Error = Error;
 
     /// Return the [`HtmlEntity`] associated with a literal character.
+    ///
+    /// # Errors
+    ///
+    /// - [`Error::NoSuchCharLiteral`] if the [`char`] does not have an a associated [`HtmlEntity`]
     fn try_from(literal: char) -> Result<Self, Self::Error> {
         Self::try_from(&literal)
     }
@@ -599,6 +607,10 @@ impl TryFrom<&char> for HtmlEntity {
     type Error = Error;
 
     /// Return the [`HtmlEntity`] associated with a literal character.
+    ///
+    /// # Errors
+    ///
+    /// - [`Error::NoSuchCharLiteral`] if the [`char`] does not have an a associated [`HtmlEntity`]
     fn try_from(literal: &char) -> Result<Self, Self::Error> {
         /// Match literal characters with [`HtmlEntity`] variants.
         macro_rules! match_literal {
