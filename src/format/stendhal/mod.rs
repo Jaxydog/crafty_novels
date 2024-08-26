@@ -35,7 +35,7 @@ mod test;
 ///
 /// # Expected format
 ///
-/// *Convention: `"a string"` `'a single character'` (the `"` or `'` are not necessarily present)*
+/// *Convention: `"a string"` `'a single character'` (the `"` or `'` are not necessarily present).*
 ///
 /// The first three lines make up the frontmatter:
 /// 1. Starts with `"title: "`, the rest is considered the title of the book
