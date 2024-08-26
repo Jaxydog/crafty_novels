@@ -4,6 +4,28 @@ A library for converting text formats.
 Intended for converting Minecraft: Java Edition books to HTML,
 but it exposes traits necessary to implement arbitrary formats.
 
+## How it works
+
+crafty_novels revolves around syntax:
+
+Lexical tokens (`crafty_novels::syntax::Token`) represent
+plain text, formatting, document structure, etc.\
+Similarly, `crafty_novels::syntax::Metadata` tokens represent meta information about a work
+(currently the title and author name).\
+A `crafty_novels::syntax::TokenList` represents an entire work
+by holding arrays of those `Token`s and `Metadata` tokens.
+
+Structs that implement the `crafty_novels::LexicalTokenizer` trait
+take input (`impl std::io::Read` or `&str`) in their format's syntax
+and parse it into a `TokenList`.
+
+Structs that implement the `crafty_novels::Export` trait
+take that `TokenList`, convert it to their format's syntax,
+and write that to an output (`impl std::io::Write` or `Box<str>`).
+
+crafty_novels contains [some built-in implementations of these traits](#supported-formats),
+but the traits are exposed if you would like to implement your own.
+
 ## Supported formats
 
 ### Import
