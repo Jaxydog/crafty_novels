@@ -22,7 +22,7 @@
 //!
 //! # How it works
 //!
-//! Structs that implement [`LexicalTokenizer`] take input in their format, parse it, and return a
+//! Structs that implement [`Tokenize`] take input in their format, parse it, and return a
 //! [`TokenList`].
 //! Structs that implement [`Export`] take that [`TokenList`], convert it to their format, and
 //! write that to the output.
@@ -46,7 +46,7 @@ use syntax::TokenList;
 // These could return better errors -- exporting to string never error, exporting to `impl Write`
 // should only error on `std::io::Error`.
 //
-// Similarly, `LexicalTokenizer` could do with a `impl std::error::Error` (maybe something to do
+// Similarly, `Tokenize` could do with a `impl std::error::Error` (maybe something to do
 // with `std::io::Error` also?) so that implementation is more flexible.
 
 pub trait Export {
@@ -59,7 +59,7 @@ pub trait Export {
     ) -> Result<(), Error>;
 }
 
-pub trait LexicalTokenizer {
+pub trait Tokenize {
     /// Parse a string into an abstract syntax vector.
     fn tokenize_string(input: &str) -> Result<TokenList, Error>;
     /// Parse a file into an abstract syntax vector.

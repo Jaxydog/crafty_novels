@@ -23,7 +23,7 @@
 use crate::{
     error::Error,
     syntax::{Token, TokenList},
-    LexicalTokenizer,
+    Tokenize,
 };
 use std::io::{BufRead, BufReader, Read};
 
@@ -54,7 +54,7 @@ mod test;
 /// [Stendhal]: https://modrinth.com/mod/stendhal
 pub struct Stendhal;
 
-impl LexicalTokenizer for Stendhal {
+impl Tokenize for Stendhal {
     /// Parse a string in the Stendhal format into an abstract syntax vector.
     ///
     /// # Errors
