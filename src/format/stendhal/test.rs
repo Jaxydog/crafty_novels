@@ -18,7 +18,7 @@
 //! Tests for parsing the [Stendhal][`super::Stendhal`] format.
 
 use super::parse;
-use crate::syntax::Metadata;
+use crate::syntax::{Metadata, Token};
 
 #[test]
 fn test_parse_frontmatter() {
@@ -38,4 +38,107 @@ pages:
 
     assert_eq!(lines.next().unwrap(), expected_line);
     assert_eq!(metadata, expected_metadata);
+}
+
+#[test]
+fn test_line() {
+    /// Compare an an output from [`parse::line`] and the expected output.
+    macro_rules! test {
+        ( $( $input:expr => $expects:expr );+ ; ) => {
+            $({
+                let mut output: Vec<Token> = vec![];
+                parse::line(&mut output, $input).unwrap();
+
+                assert_eq!(output, $expects);
+            })+
+        };
+    }
+
+    /// Insert a [`Token::Format`] with the given variant.
+    macro_rules! format {
+        ($format:ident) => {
+            crate::syntax::Token::Format(crate::syntax::minecraft::Format::$format)
+        };
+    }
+
+    /// Insert a [`Token::Format`] with the given color.
+    macro_rules! color {
+        ($color:ident) => {
+            crate::syntax::Token::Format(crate::syntax::minecraft::Format::Color(
+                crate::syntax::minecraft::Color::$color,
+            ))
+        };
+    }
+
+    /// Insert a [`Token::Text`] with the given string.
+    macro_rules! text {
+        ($text:expr) => {
+            crate::syntax::Token::Text($text.into())
+        };
+    }
+
+    use Token::{LineBreak, ParagraphBreak, Space, ThematicBreak};
+
+    test!(
+        "#- page start" => [
+            ThematicBreak,
+            text!("page"), Space,
+            text!("start"), LineBreak,
+        ];
+        "Plain line" => [
+            text!("Plain"), Space,
+            text!("line"), LineBreak,
+        ];
+        "Not #- new page" => [
+            text!("Not"), Space,
+            text!("#-"), Space,
+            text!("new"), Space,
+            text!("page"), LineBreak,
+        ];
+        " #- not new page" => [
+            Space,
+            text!("#-"), Space,
+            text!("not"), Space,
+            text!("new"), Space,
+            text!("page"), LineBreak,
+        ];
+        "" => [
+            ParagraphBreak
+        ];
+        "Some §cRED text" => [
+            text!("Some"), Space,
+            color!(Red),
+            text!("RED"), Space,
+            text!("text"),
+            format!(Reset), LineBreak,
+        ];
+        "Italic:§o text §rreset" => [
+            text!("Italic:"),
+            format!(Italic), Space,
+            text!("text"), Space,
+            format!(Reset),
+            text!("reset"), LineBreak,
+        ];
+        "   lots    of   spaces     " => [
+            Space, Space, Space,
+            text!("lots"),
+            Space, Space, Space, Space,
+            text!("of"),
+            Space, Space, Space,
+            text!("spaces"),
+            Space, Space, Space, Space, Space,
+            LineBreak,
+        ];
+        "one space " => [
+            text!("one"), Space,
+            text!("space"), Space,
+            LineBreak,
+        ];
+        "<div>HTML &gt; & &amp;</div>" => [
+            text!("<div>HTML"), Space,
+            text!("&gt;"), Space,
+            text!("&"), Space,
+            text!("&amp;</div>"), LineBreak,
+        ];
+    );
 }
