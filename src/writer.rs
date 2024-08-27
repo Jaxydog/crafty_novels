@@ -32,7 +32,7 @@ pub struct Utf8Writer<W: Write>(BufWriter<W>);
 
 impl<W: Write> Utf8Writer<W> {
     /// Create a new [`Utf8Writer`] using a given [`Write`] `output`.
-    fn new(output: W) -> Self {
+    pub fn new(output: W) -> Self {
         Self(BufWriter::new(output))
     }
 
@@ -40,7 +40,7 @@ impl<W: Write> Utf8Writer<W> {
     ///
     /// # Errors
     ///
-    /// - [`std::io::Error`] when calling `.write_all` to the internal writer.
+    /// - [`std::io::Error`] when calling `.write_all` on the internal writer.
     pub fn write_str(&mut self, str: impl AsRef<str>) -> Result<()> {
         self.0.write_all(str.as_ref().as_bytes())
     }
@@ -49,7 +49,7 @@ impl<W: Write> Utf8Writer<W> {
     ///
     /// # Errors
     ///
-    /// - [`std::io::Error`] when calling `.write_all` to the internal writer.
+    /// - [`std::io::Error`] when calling `.write_all` on the internal writer.
     pub fn write_char(&mut self, char: char) -> Result<()> {
         self.0.write_all(char.to_string().as_bytes())
     }
@@ -58,7 +58,7 @@ impl<W: Write> Utf8Writer<W> {
     ///
     /// # Errors
     ///
-    /// - [`std::io::Error`] when calling `.write_all` to the internal writer.
+    /// - [`std::io::Error`] when calling `.write_all` on the internal writer.
     pub fn write_fmt(&mut self, fmt: std::fmt::Arguments) -> Result<()> {
         self.0.write_fmt(fmt)
     }
@@ -72,8 +72,17 @@ impl<W: Write> Utf8Writer<W> {
     ///
     /// # Errors
     ///
-    /// - [`std::io::Error`] when calling `.write_all` to the internal writer.
+    /// - [`std::io::Error`] when calling `.write_all` on the internal writer.
     pub unsafe fn write_bytes(&mut self, bytes: &[u8]) -> Result<()> {
         self.0.write_all(bytes)
+    }
+
+    /// Flush all buffered writes into `output`.
+    ///
+    /// # Errors
+    ///
+    /// - [`std::io::Error`] when calling `.flush` on the internal writer.
+    pub fn flush(&mut self) -> Result<()> {
+        self.0.flush()
     }
 }
