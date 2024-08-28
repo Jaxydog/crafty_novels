@@ -63,7 +63,6 @@ impl Tokenize for Stendhal {
     ///   character
     /// - [`Error::NoSuchFormatCode`] if it encounters a `'§'` isn't followed by a valid
     ///   [`Format`][`crate::syntax::minecraft::Format`] character
-    /// - [`Error::Io`] if it encounters some kind of I/O error while reading from `input`
     /// - [`Error::UnexpectedEndOfIter`] if `input` ends before the frontmatter parsing is finished
     /// - [`Error::IncompleteOrMissingFrontmatter`] if the frontmatter does not have an expected
     ///   field
