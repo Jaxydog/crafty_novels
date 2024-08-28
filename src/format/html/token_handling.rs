@@ -61,8 +61,8 @@ pub fn handle_token(
 ///
 /// # Errors
 ///
-/// - [`Error::Io`] if it cannot write into `output`
-fn insert_string_as_html(output: &mut Utf8Writer<impl Write>, input: &str) -> Result<(), Error> {
+/// - [`std::io::Error`] if it cannot write into `output`
+fn insert_string_as_html(output: &mut Utf8Writer<impl Write>, input: &str) -> std::io::Result<()> {
     for char in input.chars() {
         if let Ok(as_html_entity) = HtmlEntity::try_from(&char) {
             write!(output, "{as_html_entity}")?;
@@ -182,11 +182,11 @@ fn close_formatting_tags(
 ///
 /// # Errors
 ///
-/// - [`Error::Io`] if it cannot write into `output`
+/// - [`std::io::Error`] if it cannot write into `output`
 pub fn start_document(
     output: &mut Utf8Writer<impl Write>,
     metadata: &[Metadata],
-) -> Result<(), Error> {
+) -> std::io::Result<()> {
     // Should this really be assuming English and LTR text?
     output
         .write_str(r#"<!DOCTYPE html><html lang="en" dir="ltr"><head><meta charset="utf-8" />"#)?;

@@ -20,7 +20,6 @@
 //! See [`Html`] for more details.
 
 use crate::{
-    error::Error,
     syntax::{minecraft::Format, TokenList},
     writer::Utf8Writer,
     Export,
@@ -89,23 +88,19 @@ pub struct Html {}
 
 impl Export for Html {
     /// Parse a given abstract syntax vector into HTML, then output that as a string.
-    ///
-    /// # Errors
-    ///
-    /// Due to the internal implementation, the following errors could theoretically occur, however
-    /// unlikely they may be:
-    ///
-    /// - [`Error::Io`] if it cannot write into the output string
-    fn export_token_vector_to_string(tokens: TokenList) -> Result<Box<str>, Error> {
+    fn export_token_vector_to_string(tokens: TokenList) -> Box<str> {
         let mut bytes: Vec<u8> = vec![];
 
-        Self::export_token_vector_to_writer(tokens, &mut bytes)?;
+        Self::export_token_vector_to_writer(tokens, &mut bytes)
+            // https://github.com/rust-lang/rust/blob/1.80.1/library/std/src/io/impls.rs#L433-L437
+            // https://github.com/rust-lang/rust/blob/1.80.1/library/alloc/src/vec/mod.rs#L2569-L2592
+            .expect(
+                "the `std::io::Write` implementations for `Vec<u8>` are infallible (as of 1.80.1)",
+            );
 
-        let as_str = String::from_utf8(bytes)
+        String::from_utf8(bytes)
             .expect("`Utf8Writer` only writes UTF-8 encoded types")
-            .into_boxed_str();
-
-        Ok(as_str)
+            .into_boxed_str()
     }
 
     /// Parse a given abstract syntax vector into HTML, then output that into a writer, like a
@@ -119,7 +114,7 @@ impl Export for Html {
     fn export_token_vector_to_writer(
         tokens: TokenList,
         output: &mut impl Write,
-    ) -> Result<(), Error> {
+    ) -> std::io::Result<()> {
         let mut writer = Utf8Writer::new(output);
 
         token_handling::start_document(&mut writer, tokens.metadata_as_slice())?;
@@ -133,13 +128,22 @@ impl Export for Html {
 
         let mut format_token_stack: Vec<Format> = vec![];
         for token in tokens.tokens_as_slice() {
-            // [`token_handling::handle_token`] states that it could return
-            // [`Error::UnexpectedToken`], but that it will never cause the necessary state to
-            // occur on its own.
-            //
-            // Because nothing else every mutates `format_token_stack`, this state will never
-            // occur, and this particle error can be ignored.
-            token_handling::handle_token(&mut writer, &mut format_token_stack, token)?;
+            token_handling::handle_token(&mut writer, &mut format_token_stack, token).map_err(
+                |e| match e {
+                    crate::error::Error::Io(e) => e,
+                    _ => {
+                        // [`token_handling::handle_token`] states that it could return
+                        // [`Error::UnexpectedToken`], but that it will never cause the necessary
+                        // state to occur on its own.
+                        //
+                        // Because nothing else every mutates `format_token_stack`, this state will
+                        // never occur, and this particular error can be ignored.
+                        unreachable!(
+                            "`token_handling::handle_token` cannot create this error on its own"
+                        )
+                    }
+                },
+            )?;
         }
 
         writer.write_str("</article></body></html>")?;

@@ -50,14 +50,28 @@ use syntax::TokenList;
 // Similarly, `Tokenize` could do with a `impl std::error::Error` (maybe something to do
 // with `std::io::Error` also?) so that implementation is more flexible.
 
+/// Methods for exporting [`TokenList`]s into other document formats.
+///
+/// # Implementation
+///
+/// Behavior should be exactly the same between the two methods, so it is suggested that
+/// [`export_token_vector_to_string`] simply pass a `Vec<u8>` to [`export_token_vector_to_writer`].
+///
+/// Implementing it this way can still be infallible:
+/// As of Rust 1.80.1, `.write_all` is infallible for [`Vec<u8>`], and a UTF-8 wrapper over a
+/// [`std::io::BufWriter`] can render [`String::from_utf8`] infallible.
 pub trait Export {
     /// Parse a given abstract syntax vector into a certain format, then output that as a string.
-    fn export_token_vector_to_string(tokens: TokenList) -> Result<Box<str>, Error>;
+    fn export_token_vector_to_string(tokens: TokenList) -> Box<str>;
     /// Parse a given abstract syntax vector into a certain format, writing the result into `output`.
+    ///
+    /// # Errors
+    ///
+    /// - [`std::io::Error`] if it cannot write into `output`
     fn export_token_vector_to_writer(
         tokens: TokenList,
         output: &mut impl Write,
-    ) -> Result<(), Error>;
+    ) -> std::io::Result<()>;
 }
 
 pub trait Tokenize {
