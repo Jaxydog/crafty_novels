@@ -48,7 +48,7 @@ just one space
 last line";
 
     let tokens = dbg!(Stendhal::tokenize_string(input).unwrap());
-    let html = Html::export_token_vector_to_string(tokens).unwrap();
+    let html = Html::export_token_vector_to_string(tokens);
 
     print!("{html}");
 }

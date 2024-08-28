@@ -33,7 +33,7 @@ mod token_handling;
 ///
 /// # Format
 ///
-/// *Convention: the follow is actually written without line endings (though the `<tag />` style
+/// *Convention: the following is actually written without line endings (though the `<tag />` style
 /// remains). `{}` is not present in the output, but indicates where data is placed in it.*
 ///
 /// Opens with the following:
@@ -63,7 +63,7 @@ mod token_handling;
 ///
 /// Inside of the contents:
 ///
-/// - Plain text are written as [HTML entities][`syntax::HtmlEntity`] where applicable
+/// - Plain text is written as [HTML entities][`syntax::HtmlEntity`] where applicable
 /// - Spaces are written as just plain spaces: `' '` (without the `'`)
 ///     - `<article>` having the style `white-space:break-spaces` (mostly) preserves the spaces
 ///       without the need for `&nbsp;`

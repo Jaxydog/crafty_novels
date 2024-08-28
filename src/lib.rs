@@ -64,6 +64,7 @@ use syntax::TokenList;
 pub trait Export {
     /// Parse a given abstract syntax vector into a certain format, then output that as a string.
     fn export_token_vector_to_string(tokens: TokenList) -> Box<str>;
+
     /// Parse a given abstract syntax vector into a certain format, writing the result into `output`.
     ///
     /// # Errors
@@ -79,7 +80,11 @@ pub trait Export {
 ///
 /// # Implementation
 ///
-/// Is reading from a string infallible?
+/////////////////
+///
+/// -- TODO --
+///
+/////////////////
 pub trait Tokenize {
     /// Parse a string into an abstract syntax vector.
     ///
@@ -92,6 +97,7 @@ pub trait Tokenize {
     /// [malformed]: TokenizeError::MalformedSyntaxItem
     /// [misplaced]: TokenizeError::UnexpectedSyntaxItem
     fn tokenize_string(input: &str) -> Result<TokenList, TokenizeError>;
+
     /// Parse a file into an abstract syntax vector.
     ///
     /// # Errors
