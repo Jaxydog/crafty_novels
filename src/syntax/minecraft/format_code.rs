@@ -61,8 +61,8 @@ impl FromStr for FormatCode {
     ///
     /// # Errors
     ///
-    /// - [`Error::InvalidFormatCodeString`] if passed a string that is longer than two [`char`]s
-    ///   or does not start with `'§'`
+    /// - [`Error::InvalidFormatCodeString`] if passed a string that is longer or short than two
+    ///   [`char`]s, or does not start with `'§'`
     fn from_str(string: &str) -> Result<Self, Self::Err> {
         if !(string.starts_with('§') && string.chars().count() == 2) {
             return Err(Error::InvalidFormatCodeString(string.to_string()));

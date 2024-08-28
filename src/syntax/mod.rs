@@ -37,11 +37,13 @@ pub struct TokenList {
 
 impl TokenList {
     /// Creates a new [`TokenList`].
+    #[must_use]
     pub const fn new(metadata: Arc<[Metadata]>, tokens: Arc<[Token]>) -> Self {
         Self { metadata, tokens }
     }
 
     /// Creates a new [`TokenList`] by consuming `Box`es.
+    #[must_use]
     pub fn new_from_boxed(metadata: Box<[Metadata]>, tokens: Box<[Token]>) -> Self {
         Self {
             metadata: metadata.into(),
@@ -50,21 +52,25 @@ impl TokenList {
     }
 
     /// Returns a shared reference to the internal [`Metadata`] slice.
+    #[must_use]
     pub fn metadata_as_slice(&self) -> &[Metadata] {
         &self.metadata
     }
 
     /// Returns a shared reference to the internal [`Token`] slice.
+    #[must_use]
     pub fn tokens_as_slice(&self) -> &[Token] {
         &self.tokens
     }
 
     /// Returns a copy of the internal [`Arc`] holding a [`Metadata`] slice.
+    #[must_use]
     pub fn metadata(&self) -> Arc<[Metadata]> {
         self.metadata.clone()
     }
 
     /// Returns a copy of the internal [`Arc`] holding a [`Token`] slice.
+    #[must_use]
     pub fn tokens(&self) -> Arc<[Token]> {
         self.tokens.clone()
     }
@@ -93,6 +99,7 @@ pub enum Token {
 
 impl Token {
     /// Whether or not a [`Token`] corresponds to some kind of line break.
+    #[must_use]
     pub const fn is_break(&self) -> bool {
         matches!(
             *self,
@@ -101,11 +108,13 @@ impl Token {
     }
 
     /// Whether or not a [`Token`] corresponds to some kind of white space character.
+    #[must_use]
     pub const fn is_white_space(&self) -> bool {
         matches!(*self, Self::Space) || self.is_break()
     }
 
     /// Whether or not a [`Token`] is [`Token::Text`].
+    #[must_use]
     pub const fn is_text(&self) -> bool {
         matches!(*self, Self::Text(_))
     }
@@ -121,6 +130,8 @@ impl From<&mut Vec<char>> for Token {
 /// Metadata about a literary work.
 #[derive(PartialEq, Eq, Debug)]
 pub enum Metadata {
+    /// A title of a literary work.
     Title(Box<str>),
+    /// An author of a literary work.
     Author(Box<str>),
 }

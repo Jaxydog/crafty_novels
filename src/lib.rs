@@ -38,7 +38,7 @@ mod error;
 pub mod export;
 mod format;
 pub mod import;
-mod syntax;
+pub mod syntax;
 mod writer;
 
 use error::Error;
