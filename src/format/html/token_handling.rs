@@ -21,8 +21,9 @@ use super::syntax::HtmlEntity;
 use crate::{
     error::Error,
     syntax::{minecraft::Format, Metadata, Token},
+    writer::Utf8Writer,
 };
-use std::io::{BufWriter, Write};
+use std::io::Write;
 
 /// Push the appropriate HTML element(s) for `token` into `output`.
 /// If `token` is [`Token::Format`], it is pushed onto `format_token_stack`.
@@ -35,17 +36,17 @@ use std::io::{BufWriter, Write};
 ///     `format_token_stack` could have done it
 /// - [`Error::Io`] if it cannot write into `output`
 pub fn handle_token(
-    output: &mut BufWriter<impl Write>,
+    output: &mut Utf8Writer<impl Write>,
     format_token_stack: &mut Vec<Format>,
     token: &Token,
 ) -> Result<(), Error> {
     match &token {
         Token::Text(s) => insert_string_as_html(output, s)?,
         Token::Format(f) => handle_format(output, format_token_stack, *f)?,
-        Token::Space => write!(output, " ")?,
-        Token::LineBreak => write!(output, "<br />")?,
-        Token::ParagraphBreak => write!(output, "<br />")?,
-        Token::ThematicBreak => write!(output, "<hr />")?,
+        Token::Space => output.write_str(" ")?,
+        Token::LineBreak => output.write_str("<br />")?,
+        Token::ParagraphBreak => output.write_str("<br />")?,
+        Token::ThematicBreak => output.write_str("<hr />")?,
     };
 
     Ok(())
@@ -61,12 +62,12 @@ pub fn handle_token(
 /// # Errors
 ///
 /// - [`Error::Io`] if it cannot write into `output`
-fn insert_string_as_html(output: &mut BufWriter<impl Write>, input: &str) -> Result<(), Error> {
+fn insert_string_as_html(output: &mut Utf8Writer<impl Write>, input: &str) -> Result<(), Error> {
     for char in input.chars() {
         if let Ok(as_html_entity) = HtmlEntity::try_from(&char) {
             write!(output, "{as_html_entity}")?;
         } else {
-            write!(output, "{char}")?;
+            output.write_char(char)?;
         }
     }
 
@@ -86,7 +87,7 @@ fn insert_string_as_html(output: &mut BufWriter<impl Write>, input: &str) -> Res
 ///     `format_token_stack` could have done it
 /// - [`Error::Io`] if it cannot write into `output`
 fn handle_format(
-    output: &mut BufWriter<impl Write>,
+    output: &mut Utf8Writer<impl Write>,
     format_token_stack: &mut Vec<Format>,
     format_token: Format,
 ) -> Result<(), Error> {
@@ -110,7 +111,7 @@ fn handle_format(
                 $(
                     Format::$format => {
                         $format_token_stack.push($format_token);
-                        write!($output, $html)?;
+                        $output.write_str($html)?;
                     }
                 ),+ ,
                 Format::Reset => $reset_fn,
@@ -140,7 +141,7 @@ fn handle_format(
 /// - [`Error::UnexpectedToken`] if `format_token_stack` contains [`Format::Reset`]
 /// - [`Error::Io`] if it cannot write into `output`
 fn close_formatting_tags(
-    output: &mut BufWriter<impl Write>,
+    output: &mut Utf8Writer<impl Write>,
     format_token_stack: &mut Vec<Format>,
 ) -> Result<(), Error> {
     /// Generates a match statement with [`Format`] variants to write the given HTML (containing
@@ -152,9 +153,9 @@ fn close_formatting_tags(
             $( $format:ident => $html:expr ),+ ;
         ) => {
             match $format_token {
-                Format::Color(_) => write!($output, $color_html)?,
+                Format::Color(_) => $output.write_str($color_html)?,
                 $(
-                    Format::$format => write!($output, $html)?
+                    Format::$format => $output.write_str($html)?
                 ),+ ,
                 Format::Reset => return Err(Error::UnexpectedToken(Token::Format(Format::Reset))),
             }
@@ -183,14 +184,12 @@ fn close_formatting_tags(
 ///
 /// - [`Error::Io`] if it cannot write into `output`
 pub fn start_document(
-    output: &mut BufWriter<impl Write>,
+    output: &mut Utf8Writer<impl Write>,
     metadata: &[Metadata],
 ) -> Result<(), Error> {
     // Should this really be assuming English and LTR text?
-    write!(
-        output,
-        r#"<!DOCTYPE html><html lang="en" dir="ltr"><head><meta charset="utf-8" />"#
-    )?;
+    output
+        .write_str(r#"<!DOCTYPE html><html lang="en" dir="ltr"><head><meta charset="utf-8" />"#)?;
 
     for data in metadata {
         match data {
@@ -200,9 +199,8 @@ pub fn start_document(
         }
     }
 
-    write!(
-        output,
-        r#"<meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>"#
+    output.write_str(
+        r#"<meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>"#,
     )?;
 
     Ok(())

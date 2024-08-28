@@ -22,9 +22,10 @@
 use crate::{
     error::Error,
     syntax::{minecraft::Format, TokenList},
+    writer::Utf8Writer,
     Export,
 };
-use std::io::{BufWriter, Write};
+use std::io::Write;
 
 mod syntax;
 mod token_handling;
@@ -95,20 +96,22 @@ impl Export for Html {
     /// unlikely they may be:
     ///
     /// - [`Error::Io`] if it cannot write into the output string
-    /// - [`Error::Utf8`] if attempts to write invalid UTF-8 into the output string
     fn export_token_vector_to_string(tokens: TokenList) -> Result<Box<str>, Error> {
         let mut bytes: Vec<u8> = vec![];
 
         Self::export_token_vector_to_writer(tokens, &mut bytes)?;
 
-        // `Self::export_token_vector_to_writer` will only ever be writing UTF-8 strings
-        let as_str = String::from_utf8(bytes)?.into_boxed_str();
+        let as_str = String::from_utf8(bytes)
+            .expect("`Utf8Writer` only writes UTF-8 encoded types")
+            .into_boxed_str();
 
         Ok(as_str)
     }
 
     /// Parse a given abstract syntax vector into HTML, then output that into a writer, like a
     /// [`std::fs::File`].
+    ///
+    /// Guaranteed to only write valid UTF-8.
     ///
     /// # Errors
     ///
@@ -117,16 +120,16 @@ impl Export for Html {
         tokens: TokenList,
         output: &mut impl Write,
     ) -> Result<(), Error> {
-        let mut writer = BufWriter::new(output);
+        let mut writer = Utf8Writer::new(output);
 
         token_handling::start_document(&mut writer, tokens.metadata_as_slice())?;
 
         // Most readable
-        write!(writer, "<body><article style=white-space:break-spaces>")?;
+        writer.write_str("<body><article style=white-space:break-spaces>")?;
 
         // Most accurate
         // Does, however, still consume spaces that break, which Minecraft books do not
-        // write!(writer, "<article style=line-break:anywhere>");
+        // writer.write_str("<article style=line-break:anywhere>");
 
         let mut format_token_stack: Vec<Format> = vec![];
         for token in tokens.tokens_as_slice() {
@@ -139,8 +142,7 @@ impl Export for Html {
             token_handling::handle_token(&mut writer, &mut format_token_stack, token)?;
         }
 
-        // Does not compile to be the same as `writer.write_all(b"str")`!
-        write!(writer, "</article></body></html>")?;
+        writer.write_str("</article></body></html>")?;
 
         writer.flush()?;
         Ok(())
