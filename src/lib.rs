@@ -42,6 +42,7 @@ mod syntax;
 mod writer;
 
 use error::Error;
+pub use error::TokenizeError;
 use syntax::TokenList;
 
 // These could return better errors -- exporting to string never error, exporting to `impl Write`
@@ -74,9 +75,33 @@ pub trait Export {
     ) -> std::io::Result<()>;
 }
 
+/// Methods for importing documents into [`TokenList`]s.
+///
+/// # Implementation
+///
+/// Is reading from a string infallible?
 pub trait Tokenize {
     /// Parse a string into an abstract syntax vector.
-    fn tokenize_string(input: &str) -> Result<TokenList, Error>;
+    ///
+    /// # Errors
+    ///
+    /// On account of the differences between formats, [`TokenizeError`] is necessarily vague.
+    /// Typical errors involve [incorrect], [malformed], or [misplaced] syntax.
+    ///
+    /// [incorrect]: TokenizeError::NoSuchSyntaxItem
+    /// [malformed]: TokenizeError::MalformedSyntaxItem
+    /// [misplaced]: TokenizeError::UnexpectedSyntaxItem
+    fn tokenize_string(input: &str) -> Result<TokenList, TokenizeError>;
     /// Parse a file into an abstract syntax vector.
-    fn tokenize_reader(input: impl Read) -> Result<TokenList, Error>;
+    ///
+    /// # Errors
+    ///
+    /// On account of the differences between formats, [`TokenizeError`] is necessarily vague.
+    /// Typical errors include [I/O errors] and [incorrect], [malformed], or [misplaced] syntax.
+    ///
+    /// [I/O errors]: TokenizeError::Io
+    /// [incorrect]: TokenizeError::NoSuchSyntaxItem
+    /// [malformed]: TokenizeError::MalformedSyntaxItem
+    /// [misplaced]: TokenizeError::UnexpectedSyntaxItem
+    fn tokenize_reader(input: impl Read) -> Result<TokenList, TokenizeError>;
 }

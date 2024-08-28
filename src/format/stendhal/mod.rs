@@ -23,7 +23,7 @@
 use crate::{
     error::Error,
     syntax::{Token, TokenList},
-    Tokenize,
+    Tokenize, TokenizeError,
 };
 use std::io::{BufRead, BufReader, Read};
 
@@ -67,7 +67,7 @@ impl Tokenize for Stendhal {
     /// - [`Error::UnexpectedEndOfIter`] if `input` ends before the frontmatter parsing is finished
     /// - [`Error::IncompleteOrMissingFrontmatter`] if the frontmatter does not have an expected
     ///   field
-    fn tokenize_string(input: &str) -> Result<TokenList, Error> {
+    fn tokenize_string(input: &str) -> Result<TokenList, TokenizeError> {
         let mut input = input.lines();
         let mut tokens: Vec<Token> = vec![];
 
@@ -94,7 +94,7 @@ impl Tokenize for Stendhal {
     /// - [`Error::UnexpectedEndOfIter`] if `input` ends before the frontmatter parsing is finished
     /// - [`Error::IncompleteOrMissingFrontmatter`] if the frontmatter does not have an expected
     ///   field
-    fn tokenize_reader(input: impl Read) -> Result<TokenList, Error> {
+    fn tokenize_reader(input: impl Read) -> Result<TokenList, TokenizeError> {
         /// Get a refrence to the next element in `$iter` or return [`Error::UnexpectedEndOfIter`]
         /// or the encapsulated [`Error::Io`].
         macro_rules! next {

@@ -45,3 +45,43 @@ pub enum Error {
     #[error("could not convert to UTF-8")]
     Utf8(#[from] std::string::FromUtf8Error),
 }
+
+/// Represents the possible errors encountered when parsing a document in a flexible way.
+#[allow(clippy::module_name_repetitions)] // This will be exported outside of `error`
+#[derive(thiserror::Error, Debug)]
+pub enum TokenizeError {
+    #[error("no such syntax item")]
+    NoSuchSyntaxItem,
+    #[error("malformed syntax item")]
+    MalformedSyntaxItem,
+    #[error("did not expect syntax item here")]
+    UnexpectedSyntaxItem,
+    #[error("{0}")]
+    Other(#[from] Box<dyn std::error::Error>),
+    #[error("could not perform I/O action")]
+    Io(#[from] std::io::Error),
+    #[error("could not format item")]
+    Fmt(#[from] std::fmt::Error),
+    #[error("invalid UTF-8")]
+    Utf8(#[from] std::string::FromUtf8Error),
+}
+
+impl From<Error> for TokenizeError {
+    fn from(err: Error) -> Self {
+        use TokenizeError::{
+            Fmt, Io, MalformedSyntaxItem, NoSuchSyntaxItem, UnexpectedSyntaxItem, Utf8,
+        };
+        match err {
+            Error::InvalidFormatCodeString(_)
+            | Error::NoSuchFormatCode(_)
+            | Error::MissingFormatCode
+            | Error::UnexpectedEndOfIter
+            | Error::IncompleteOrMissingFrontmatter => MalformedSyntaxItem,
+            Error::NoSuchCharLiteral(_) => NoSuchSyntaxItem,
+            Error::UnexpectedToken(_) => UnexpectedSyntaxItem,
+            Error::Io(e) => Io(e),
+            Error::Fmt(e) => Fmt(e),
+            Error::Utf8(e) => Utf8(e),
+        }
+    }
+}
