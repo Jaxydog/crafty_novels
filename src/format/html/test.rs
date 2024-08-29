@@ -92,7 +92,7 @@ fn html_string() {
     /// Compare an output from [string exporting] and the expected output.
     ///
     /// Accepts either `[Token]` as input for [string exporting] and `&str` as its output or
-    /// `([Metadata], [Token])` and `(&str, &str)`.
+    /// `[Metadata], [Token]` and `&str, &str`.
     ///
     /// [string exporting]: Html::export_token_vector_to_string
     macro_rules! test {
