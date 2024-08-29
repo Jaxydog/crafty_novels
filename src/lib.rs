@@ -28,6 +28,37 @@
 //! write that to the output.
 //!
 //! Built-in implementations can be found in [`import`] and [`export`].
+//!
+//! # Examples
+//!
+//! ```rust
+//! use crafty_novels::{export::Html, import::Stendhal, Export, Tokenize};
+//! # use std::error::Error;
+//!
+//! # fn main() -> Result<(), Box<dyn Error>> {
+//! let input = "title: crafty_novels
+//! author: RemasteredArch
+//! pages:
+//! ##- Page one
+//! Italic:§o text §rreset";
+//! let expects = concat!(
+//!     r#"<!DOCTYPE html><html lang="en" dir="ltr"><head><meta charset="utf-8" />"#,
+//!     r#"<title>crafty_novels</title><meta name="author" content="RemasteredArch" />"#,
+//!     r#"<meta name="viewport" content="width=device-width, initial-scale=1.0" />"#,
+//!     "</head><body><article style=white-space:break-spaces>",
+//!     "<hr />Page one<br />",
+//!     "Italic:<i> text </i>reset<br />",
+//!     "</article></body></html>"
+//! );
+//!
+//! let token_list = Stendhal::tokenize_string(input)?;
+//! let html = Html::export_token_vector_to_string(token_list);
+//!
+//! assert_eq!(html.as_ref(), expects);
+//! #
+//! #     Ok(())
+//! # }
+//! ```
 
 #![warn(clippy::cargo, clippy::nursery, clippy::pedantic)]
 #![cfg_attr(debug_assertions, allow(clippy::missing_errors_doc))]
