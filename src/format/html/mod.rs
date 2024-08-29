@@ -27,6 +27,8 @@ use crate::{
 use std::io::Write;
 
 mod syntax;
+#[cfg(test)]
+mod test;
 mod token_handling;
 
 /// Exporting for HTML.
