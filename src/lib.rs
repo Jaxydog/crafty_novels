@@ -86,28 +86,22 @@ pub trait Export {
 ///
 /////////////////
 pub trait Tokenize {
+    /// All the errors that could occur while tokenizing input.
+    type Error
+    where
+        Error: std::error::Error;
+
     /// Parse a string into an abstract syntax vector.
     ///
     /// # Errors
     ///
-    /// On account of the differences between formats, [`TokenizeError`] is necessarily vague.
-    /// Typical errors involve [incorrect], [malformed], or [misplaced] syntax.
-    ///
-    /// [incorrect]: TokenizeError::NoSuchSyntaxItem
-    /// [malformed]: TokenizeError::MalformedSyntaxItem
-    /// [misplaced]: TokenizeError::UnexpectedSyntaxItem
-    fn tokenize_string(input: &str) -> Result<TokenList, TokenizeError>;
+    /// Typical errors involve incorrect, malformed, or misplaced syntax.
+    fn tokenize_string(input: &str) -> Result<TokenList, Error>;
 
     /// Parse a file into an abstract syntax vector.
     ///
     /// # Errors
     ///
-    /// On account of the differences between formats, [`TokenizeError`] is necessarily vague.
-    /// Typical errors include [I/O errors] and [incorrect], [malformed], or [misplaced] syntax.
-    ///
-    /// [I/O errors]: TokenizeError::Io
-    /// [incorrect]: TokenizeError::NoSuchSyntaxItem
-    /// [malformed]: TokenizeError::MalformedSyntaxItem
-    /// [misplaced]: TokenizeError::UnexpectedSyntaxItem
-    fn tokenize_reader(input: impl Read) -> Result<TokenList, TokenizeError>;
+    /// Typical errors include I/O errors and incorrect, malformed, or misplaced syntax.
+    fn tokenize_reader(input: impl Read) -> Result<TokenList, Error>;
 }

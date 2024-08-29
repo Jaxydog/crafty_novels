@@ -55,6 +55,8 @@ mod test;
 pub struct Stendhal;
 
 impl Tokenize for Stendhal {
+    type Error = TokenizeError;
+
     /// Parse a string in the Stendhal format into an abstract syntax vector.
     ///
     /// # Errors
@@ -66,7 +68,7 @@ impl Tokenize for Stendhal {
     /// - [`Error::UnexpectedEndOfIter`] if `input` ends before the frontmatter parsing is finished
     /// - [`Error::IncompleteOrMissingFrontmatter`] if the frontmatter does not have an expected
     ///   field
-    fn tokenize_string(input: &str) -> Result<TokenList, TokenizeError> {
+    fn tokenize_string(input: &str) -> Result<TokenList, Error> {
         let mut input = input.lines();
         let mut tokens: Vec<Token> = vec![];
 
@@ -93,7 +95,7 @@ impl Tokenize for Stendhal {
     /// - [`Error::UnexpectedEndOfIter`] if `input` ends before the frontmatter parsing is finished
     /// - [`Error::IncompleteOrMissingFrontmatter`] if the frontmatter does not have an expected
     ///   field
-    fn tokenize_reader(input: impl Read) -> Result<TokenList, TokenizeError> {
+    fn tokenize_reader(input: impl Read) -> Result<TokenList, Error> {
         /// Get a refrence to the next element in `$iter` or return [`Error::UnexpectedEndOfIter`]
         /// or the encapsulated [`Error::Io`].
         macro_rules! next {
