@@ -18,6 +18,47 @@
 //! Exporting for HTML.
 //!
 //! See [`Html`] for more details.
+//!
+//! # Examples
+//!
+//! ```rust
+//! use crafty_novels::{
+//!    export::Html,
+//!    syntax::{minecraft::Format, Metadata, Token, TokenList},
+//!    Export,
+//! };
+//!
+//! let input_metadata = Box::new([
+//!     Metadata::Title("crafty_novels".into()),
+//!     Metadata::Author("RemasteredArch".into()),
+//! ]);
+//! let input_tokens = Box::new([
+//!     Token::ThematicBreak,
+//!     Token::Text("Italic:".into()),
+//!     Token::Format(Format::Italic),
+//!     Token::Space,
+//!     Token::Text("text".into()),
+//!     Token::Space,
+//!     Token::Format(Format::Reset),
+//!     Token::Text("reset".into()),
+//!     Token::LineBreak,
+//! ]);
+//! let input = TokenList::new_from_boxed(input_metadata, input_tokens);
+//!
+//! let expected = concat!(
+//!     r#"<!DOCTYPE html><html lang="en" dir="ltr"><head><meta charset="utf-8" />"#,
+//!     r#"<title>crafty_novels</title><meta name="author" content="RemasteredArch" />"#,
+//!     r#"<meta name="viewport" content="width=device-width, initial-scale=1.0" />"#,
+//!     "</head><body><article style=white-space:break-spaces>",
+//!     "<hr />Italic:<i> text </i>reset<br />",
+//!     "</article></body></html>"
+//! );
+//!
+//! assert_eq!(
+//!     Html::export_token_vector_to_string(input).as_ref(),
+//!     expected
+//! );
+//! ```
 
 use crate::{
     syntax::{minecraft::Format, TokenList},
