@@ -27,7 +27,7 @@ use std::sync::Arc;
 pub mod minecraft;
 
 /// Represents and entire work in abstract syntax.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TokenList {
     /// Meta information about the work.
     metadata: Arc<[Metadata]>,
