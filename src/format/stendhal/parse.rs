@@ -17,10 +17,8 @@
 
 //! The actual, under the hood, line-by-line parsing for the [Stendhal][`super::Stendhal`] format.
 
-use crate::{
-    error::Error,
-    syntax::{minecraft::Format, Metadata, Token},
-};
+use super::error::TokenizeError;
+use crate::syntax::{minecraft::Format, Metadata, Token};
 
 /// Parse a line in the Stendhal format into an abstract syntax vector.
 ///
@@ -28,9 +26,9 @@ use crate::{
 ///
 /// # Errors
 ///
-/// - [`Error::MissingFormatCode`] if `'§'` isn't followed by another character
-/// - [`Error::NoSuchFormatCode`] if `'§'` isn't followed by a valid [`Format`] character
-pub fn line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
+/// - [`TokenizeError::MissingFormatCode`] if `'§'` isn't followed by another character
+/// - [`TokenizeError::NoSuchFormatCode`] if `'§'` isn't followed by a valid [`Format`] character
+pub fn line(output: &mut Vec<Token>, line: &str) -> Result<(), TokenizeError> {
     /// Flush the current word stack into a text node.
     fn flush(output: &mut Vec<Token>, word_stack: &mut Vec<char>) {
         if !word_stack.is_empty() {
@@ -64,7 +62,7 @@ pub fn line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
             '§' => {
                 flush(output, &mut word_stack);
 
-                let code: char = iter.next().ok_or(Error::MissingFormatCode)?;
+                let code: char = iter.next().ok_or(TokenizeError::MissingFormatCode)?;
                 let code: Token = Token::Format(Format::try_from(code)?);
 
                 trailing_formatting = !matches!(code, Token::Format(Format::Reset));
@@ -94,21 +92,20 @@ pub fn line(output: &mut Vec<Token>, line: &str) -> Result<(), Error> {
 ///
 /// # Errors
 ///
-/// Errors if, before it finishes parsing the frontmatter,
-/// - The iterator empties
-///     - [`Error::UnexpectedEndOfIter`]
-/// - The a line does not have the expected field
-///     - [`Error::IncompleteOrMissingFrontmatter`]
-pub fn frontmatter<'s>(iter: &mut impl Iterator<Item = &'s str>) -> Result<Box<[Metadata]>, Error> {
+/// - [`TokenizeError::IncompleteOrMissingFrontmatter`] if, before it finishes parsing the
+///   frontmatter, the iterator empties or a line does not have the expected field
+pub fn frontmatter<'s>(
+    iter: &mut impl Iterator<Item = &'s str>,
+) -> Result<Box<[Metadata]>, TokenizeError> {
     /// Strip the prefix from the next line and return it or an error.
     fn get_field<'s>(
         iter: &mut impl Iterator<Item = &'s str>,
         field: &str,
-    ) -> Result<&'s str, Error> {
+    ) -> Result<&'s str, TokenizeError> {
         iter.next()
-            .ok_or(Error::UnexpectedEndOfIter)?
+            .ok_or(TokenizeError::IncompleteOrMissingFrontmatter)?
             .strip_prefix(field)
-            .ok_or(Error::IncompleteOrMissingFrontmatter)
+            .ok_or(TokenizeError::IncompleteOrMissingFrontmatter)
     }
 
     let mut output: Vec<Metadata> = vec![];

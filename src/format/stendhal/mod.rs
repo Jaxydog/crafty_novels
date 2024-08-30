@@ -64,10 +64,12 @@
 use crate::{
     error::Error,
     syntax::{Token, TokenList},
-    Tokenize, TokenizeError,
+    Tokenize,
 };
+pub use error::TokenizeError;
 use std::io::{BufRead, BufReader, Read};
 
+mod error;
 mod parse;
 #[cfg(test)]
 mod test;
@@ -109,7 +111,7 @@ impl Tokenize for Stendhal {
     /// - [`Error::UnexpectedEndOfIter`] if `input` ends before the frontmatter parsing is finished
     /// - [`Error::IncompleteOrMissingFrontmatter`] if the frontmatter does not have an expected
     ///   field
-    fn tokenize_string(input: &str) -> Result<TokenList, Error> {
+    fn tokenize_string(input: &str) -> Result<TokenList, Self::Error> {
         let mut input = input.lines();
         let mut tokens: Vec<Token> = vec![];
 
@@ -130,13 +132,13 @@ impl Tokenize for Stendhal {
     ///
     /// - [`Error::MissingFormatCode`] if it encounters a `'§'` that isn't followed by another
     ///   character
-    /// - [`Error::NoSuchFormatCode`] if it encounters a `'§'` isn't followed by a valid [`Format`]
-    ///   character
+    /// - [`Error::NoSuchFormatCode`] if it encounters a `'§'` isn't followed by a valid
+    ///   [`Format`][`crate::syntax::minecraft::Format`] character
     /// - [`Error::Io`] if the a line from `input` is an I/O error of some kind
     /// - [`Error::UnexpectedEndOfIter`] if `input` ends before the frontmatter parsing is finished
     /// - [`Error::IncompleteOrMissingFrontmatter`] if the frontmatter does not have an expected
     ///   field
-    fn tokenize_reader(input: impl Read) -> Result<TokenList, Error> {
+    fn tokenize_reader(input: impl Read) -> Result<TokenList, Self::Error> {
         /// Get a refrence to the next element in `$iter` or return [`Error::UnexpectedEndOfIter`]
         /// or the encapsulated [`Error::Io`].
         macro_rules! next {

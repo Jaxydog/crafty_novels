@@ -64,6 +64,7 @@
 #![cfg_attr(debug_assertions, allow(clippy::missing_errors_doc))]
 
 use std::io::{Read, Write};
+use syntax::TokenList;
 
 mod error;
 pub mod export;
@@ -71,10 +72,6 @@ mod format;
 pub mod import;
 pub mod syntax;
 mod writer;
-
-use error::Error;
-pub use error::TokenizeError;
-use syntax::TokenList;
 
 // These could return better errors -- exporting to string never error, exporting to `impl Write`
 // should only error on `std::io::Error`.
@@ -118,21 +115,19 @@ pub trait Export {
 /////////////////
 pub trait Tokenize {
     /// All the errors that could occur while tokenizing input.
-    type Error
-    where
-        Error: std::error::Error;
+    type Error: std::error::Error;
 
     /// Parse a string into an abstract syntax vector.
     ///
     /// # Errors
     ///
     /// Typical errors involve incorrect, malformed, or misplaced syntax.
-    fn tokenize_string(input: &str) -> Result<TokenList, Error>;
+    fn tokenize_string(input: &str) -> Result<TokenList, Self::Error>;
 
     /// Parse a file into an abstract syntax vector.
     ///
     /// # Errors
     ///
     /// Typical errors include I/O errors and incorrect, malformed, or misplaced syntax.
-    fn tokenize_reader(input: impl Read) -> Result<TokenList, Error>;
+    fn tokenize_reader(input: impl Read) -> Result<TokenList, Self::Error>;
 }

@@ -15,44 +15,31 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-//! Error definitions for the crate.
+//! Error definitions for [`super::Stendhal`].
 //!
-//! See [`Error`].
+//! See [`TokenizeError`].
 
-use crate::syntax::Token;
-
-/// Represents the various possible errors for the crate.
+/// All the errors that could occur while tokenizing a Stendhal document.
+#[allow(clippy::module_name_repetitions)] // This will be exported outside of `error`
 #[derive(thiserror::Error, Debug)]
-pub enum Error {
+pub enum TokenizeError {
     /// Encountered when attempting to parse a malformed format string, ex. `"§ 0"` instead of
     /// `"§0"`.
     #[error("expected a two character string starting with §, received '{0}'")]
     InvalidFormatCodeString(String),
+    /// Encountered when `'§'` is encountered but not followed by another character.
+    #[error("expected a format code after '§'")]
+    MissingFormatCode,
     /// Encountered when attempting to parse a format string with an invalid format code.
     #[error("no such format code '{0}'")]
     NoSuchFormatCode(char),
-    /// Encountered when `'§'` is encountered but not followed by a format code.
-    #[error("expected a format code after '§'")]
-    MissingFormatCode,
-    /// Encountered when an no HTML entity is associated with the given [`char`].
-    #[error("no HTML entity associated with character '{0}'")]
-    NoSuchCharLiteral(char),
-    /// Encountered when an iterator ends before its consumer is finished.
-    #[error("expected iterator to be longer")]
-    UnexpectedEndOfIter,
     /// Encountered when trying to parse an frontmatter that is incomplete or entirely missing.
     #[error("frontmatter is not present or incomplete")]
     IncompleteOrMissingFrontmatter,
-    /// Encoutered a given [`Token`] in an unexpected place.
-    #[error("did not expect token")]
-    UnexpectedToken(Token),
+    /// Encountered when an iterator ends before its consumer is finished.
+    #[error("expected document to be longer")]
+    UnexpectedEndOfDocument,
     /// Encoutered when an I/O action fails in some way.
     #[error("could not perform I/O action")]
     Io(#[from] std::io::Error),
-    /// Encoutered when an [`std::fmt`] function fails in some way.
-    #[error("could not format item")]
-    Fmt(#[from] std::fmt::Error),
-    /// Encoutered when attempting to convert invallid UTF-8 into a string.
-    #[error("could not convert to UTF-8")]
-    Utf8(#[from] std::string::FromUtf8Error),
 }
