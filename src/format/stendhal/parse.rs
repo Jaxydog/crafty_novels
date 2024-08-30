@@ -17,8 +17,8 @@
 
 //! The actual, under the hood, line-by-line parsing for the [Stendhal][`super::Stendhal`] format.
 
-use super::error::TokenizeError;
-use crate::syntax::{minecraft::Format, Metadata, Token};
+use super::TokenizeError;
+use crate::syntax::{minecraft::Format, ConversionError, Metadata, Token};
 
 /// Parse a line in the Stendhal format into an abstract syntax vector.
 ///
@@ -62,7 +62,7 @@ pub fn line(output: &mut Vec<Token>, line: &str) -> Result<(), TokenizeError> {
             '§' => {
                 flush(output, &mut word_stack);
 
-                let code: char = iter.next().ok_or(TokenizeError::MissingFormatCode)?;
+                let code: char = iter.next().ok_or(ConversionError::MissingFormatCode)?;
                 let code: Token = Token::Format(Format::try_from(code)?);
 
                 trailing_formatting = !matches!(code, Token::Format(Format::Reset));

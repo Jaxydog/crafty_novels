@@ -21,8 +21,7 @@
 //!
 //! See [`FormatCode`].
 
-use super::{Color, Format};
-use crate::Error;
+use super::{Color, ConversionError, Format};
 use std::{fmt::Display, str::FromStr};
 
 /// The character following the `'§'` in the code assocated with a format code.
@@ -34,11 +33,13 @@ pub struct FormatCode(pub char);
 
 impl FormatCode {
     /// Creates a new [`FormatCode`].
+    #[must_use]
     pub const fn new(code: char) -> Self {
         Self(code)
     }
 
     /// Returns the inner [`char`].
+    #[must_use]
     pub const fn get(self) -> char {
         self.0
     }
@@ -51,7 +52,7 @@ impl From<char> for FormatCode {
 }
 
 impl FromStr for FormatCode {
-    type Err = Error;
+    type Err = ConversionError;
 
     /// Get the character following the '`§`' in a Minecraft format code.
     ///
@@ -61,11 +62,19 @@ impl FromStr for FormatCode {
     ///
     /// # Errors
     ///
-    /// - [`Error::InvalidFormatCodeString`] if passed a string that is longer or short than two
-    ///   [`char`]s, or does not start with `'§'`
+    /// - [`ConversionError::InvalidFormatCodeString`] if passed a string that does not start with
+    ///   `'§'` or is longer than two [`char`]s
+    /// - [`ConversionError::InvalidFormatCodeString`] if passed a string that does start with
+    ///   `'§'` but does not have a second [`char`]
     fn from_str(string: &str) -> Result<Self, Self::Err> {
-        if !(string.starts_with('§') && string.chars().count() == 2) {
-            return Err(Error::InvalidFormatCodeString(string.to_string()));
+        let length = string.chars().count();
+
+        if !string.starts_with('§') || length > 2 {
+            return Err(Self::Err::InvalidFormatCodeString(string.to_string()));
+        }
+
+        if length < 2 {
+            return Err(Self::Err::MissingFormatCode);
         }
 
         string.chars().nth(1).map(Self::new).ok_or_else(|| {

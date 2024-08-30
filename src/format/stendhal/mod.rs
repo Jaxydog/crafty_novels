@@ -62,7 +62,6 @@
 //! ```
 
 use crate::{
-    error::Error,
     syntax::{Token, TokenList},
     Tokenize,
 };
@@ -104,13 +103,12 @@ impl Tokenize for Stendhal {
     ///
     /// # Errors
     ///
-    /// - [`Error::MissingFormatCode`] if it encounters a `'§'` that isn't followed by another
-    ///   character
-    /// - [`Error::NoSuchFormatCode`] if it encounters a `'§'` isn't followed by a valid
-    ///   [`Format`][`crate::syntax::minecraft::Format`] character
-    /// - [`Error::UnexpectedEndOfIter`] if `input` ends before the frontmatter parsing is finished
-    /// - [`Error::IncompleteOrMissingFrontmatter`] if the frontmatter does not have an expected
-    ///   field
+    /// - [`crate::syntax::ConversionError::MissingFormatCode`] if it encounters a `'§'` that isn't
+    ///   followed by another character
+    /// - [`crate::syntax::ConversionError::NoSuchFormatCode`] if it encounters a `'§'` isn't
+    ///   followed by a valid [`Format`][`crate::syntax::minecraft::Format`] character
+    /// - [`TokenizeError::IncompleteOrMissingFrontmatter`] if `input` ends before the frontmatter
+    ///   parsing is finished
     fn tokenize_string(input: &str) -> Result<TokenList, Self::Error> {
         let mut input = input.lines();
         let mut tokens: Vec<Token> = vec![];
@@ -130,20 +128,21 @@ impl Tokenize for Stendhal {
     ///
     /// # Errors
     ///
-    /// - [`Error::MissingFormatCode`] if it encounters a `'§'` that isn't followed by another
-    ///   character
-    /// - [`Error::NoSuchFormatCode`] if it encounters a `'§'` isn't followed by a valid
-    ///   [`Format`][`crate::syntax::minecraft::Format`] character
-    /// - [`Error::Io`] if the a line from `input` is an I/O error of some kind
-    /// - [`Error::UnexpectedEndOfIter`] if `input` ends before the frontmatter parsing is finished
-    /// - [`Error::IncompleteOrMissingFrontmatter`] if the frontmatter does not have an expected
-    ///   field
+    /// - [`crate::syntax::ConversionError::MissingFormatCode`] if it encounters a `'§'` that isn't
+    ///   followed by another character
+    /// - [`crate::syntax::ConversionError::NoSuchFormatCode`] if it encounters a `'§'` isn't
+    ///   followed by a valid [`Format`][`crate::syntax::minecraft::Format`] character
+    /// - [`TokenizeError::IncompleteOrMissingFrontmatter`] if `input` ends before the frontmatter
+    ///   parsing is finished
+    /// - [`TokenizeError::Io`] if the a line from `input` is an I/O error of some kind
     fn tokenize_reader(input: impl Read) -> Result<TokenList, Self::Error> {
         /// Get a refrence to the next element in `$iter` or return [`Error::UnexpectedEndOfIter`]
         /// or the encapsulated [`Error::Io`].
         macro_rules! next {
             ($iter:expr) => {
-                &$iter.next().ok_or(Error::UnexpectedEndOfIter)??
+                &$iter
+                    .next()
+                    .ok_or(Self::Error::IncompleteOrMissingFrontmatter)??
             };
         }
 

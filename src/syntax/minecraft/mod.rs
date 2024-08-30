@@ -20,14 +20,13 @@
 //!
 //! See [`Format`].
 
-use crate::error::Error;
+use super::ConversionError;
+pub use color::{Color, ColorTuple, ColorValue};
+pub use format_code::FormatCode;
 use std::str::FromStr;
 
 mod color;
-#[allow(unused_imports)]
-pub use color::{Color, ColorTuple, ColorValue};
 mod format_code;
-pub use format_code::FormatCode;
 
 /// Represents the ways that Minecraft: Java Edition will format text.
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -43,28 +42,28 @@ pub enum Format {
 }
 
 impl TryFrom<char> for Format {
-    type Error = Error;
+    type Error = ConversionError;
 
     /// Match a format code to a [`Format`] variant.
     ///
     /// # Errors
     ///
-    /// - [`Error::NoSuchFormatCode`] if the [`FormatCode`] does not correspond to a variant of
-    ///   [`Format`]
+    /// - [`ConversionError::NoSuchFormatCode`] if the [`FormatCode`] does not correspond to a
+    ///   variant of [`Format`]
     fn try_from(value: char) -> Result<Self, Self::Error> {
         Self::try_from(FormatCode::new(value))
     }
 }
 
 impl TryFrom<FormatCode> for Format {
-    type Error = Error;
+    type Error = ConversionError;
 
     /// Look up a [`FormatCode`] against Minecraft: Java Edition's list of formatting codes.
     ///
     /// # Errors
     ///
-    /// - [`Error::NoSuchFormatCode`] if the [`FormatCode`] does not correspond to a variant of
-    ///   [`Format`]
+    /// - [`ConversionError::NoSuchFormatCode`] if the [`FormatCode`] does not correspond to a
+    ///   variant of [`Format`]
     fn try_from(code: FormatCode) -> Result<Self, Self::Error> {
         /// Match the input [`FormatCode`] to a [`Format`] Value.
         ///
@@ -78,7 +77,7 @@ impl TryFrom<FormatCode> for Format {
                 match code {
                     $( FormatCode($color_code) => Ok(Self::Color(Color::$color)) ),+,
                     $( FormatCode($format_code) => Ok(Self::$format) ),+,
-                    FormatCode(code) => Err(Error::NoSuchFormatCode(code)),
+                    FormatCode(code) => Err(Self::Error::NoSuchFormatCode(code)),
                 }
             };
         }
@@ -111,7 +110,7 @@ impl TryFrom<FormatCode> for Format {
 }
 
 impl FromStr for Format {
-    type Err = Error;
+    type Err = ConversionError;
 
     /// Get the character following the `'§'` in a Minecraft format code.
     ///
@@ -121,10 +120,10 @@ impl FromStr for Format {
     ///
     /// # Errors
     ///
-    /// - [`Error::InvalidFormatCodeString`] if passed a string that is longer than two [`char`]s
-    ///   or does not start with `'§'`
-    /// - [`Error::NoSuchFormatCode`] if the [`FormatCode`] does not correspond to a variant of
-    ///   [`Format`]
+    /// - [`ConversionError::InvalidFormatCodeString`] if passed a string that is longer than two
+    ///   [`char`]s or does not start with `'§'`
+    /// - [`ConversionError::NoSuchFormatCode`] if the [`FormatCode`] does not correspond to a
+    ///   variant of [`Format`]
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Self::try_from(FormatCode::from_str(s)?)
     }

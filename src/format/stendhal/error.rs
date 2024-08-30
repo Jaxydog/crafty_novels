@@ -19,20 +19,15 @@
 //!
 //! See [`TokenizeError`].
 
+use crate::syntax::ConversionError;
+
 /// All the errors that could occur while tokenizing a Stendhal document.
 #[allow(clippy::module_name_repetitions)] // This will be exported outside of `error`
 #[derive(thiserror::Error, Debug)]
 pub enum TokenizeError {
-    /// Encountered when attempting to parse a malformed format string, ex. `"§ 0"` instead of
-    /// `"§0"`.
-    #[error("expected a two character string starting with §, received '{0}'")]
-    InvalidFormatCodeString(String),
-    /// Encountered when `'§'` is encountered but not followed by another character.
-    #[error("expected a format code after '§'")]
-    MissingFormatCode,
-    /// Encountered when attempting to parse a format string with an invalid format code.
-    #[error("no such format code '{0}'")]
-    NoSuchFormatCode(char),
+    /// Encountered when trying to convert invalid syntax.
+    #[error("could not perform conversion: {0}")]
+    Conversion(#[from] ConversionError),
     /// Encountered when trying to parse an frontmatter that is incomplete or entirely missing.
     #[error("frontmatter is not present or incomplete")]
     IncompleteOrMissingFrontmatter,
@@ -40,6 +35,6 @@ pub enum TokenizeError {
     #[error("expected document to be longer")]
     UnexpectedEndOfDocument,
     /// Encoutered when an I/O action fails in some way.
-    #[error("could not perform I/O action")]
+    #[error("could not perform I/O action: {0}")]
     Io(#[from] std::io::Error),
 }

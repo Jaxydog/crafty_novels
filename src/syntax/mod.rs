@@ -22,8 +22,10 @@
 //!
 //! See [`TokenList`].
 
+pub use error::ConversionError;
 use std::sync::Arc;
 
+mod error;
 pub mod minecraft;
 
 /// Represents and entire work in abstract syntax.
