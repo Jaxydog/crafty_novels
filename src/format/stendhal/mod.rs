@@ -19,6 +19,47 @@
 //! See [`Stendhal`] for more details.
 //!
 //! [Stendhal]: https://modrinth.com/mod/stendhal
+//!
+//! # Examples
+//!
+//! ```rust
+//! use crafty_novels::{
+//!     import::Stendhal,
+//!     syntax::{minecraft::Format, Metadata, Token, TokenList},
+//!     Tokenize,
+//! };
+//! # use std::error::Error;
+//!
+//! # fn main() -> Result<(), Box<dyn Error>> {
+//! let input = "title: crafty_novels
+//! author: RemasteredArch
+//! pages:
+//! ##- Italic:§o text §rreset";
+//!
+//! let expected_metadata = Box::new([
+//!     Metadata::Title("crafty_novels".into()),
+//!     Metadata::Author("RemasteredArch".into()),
+//! ]);
+//! let expected_tokens = Box::new([
+//!     Token::ThematicBreak,
+//!     Token::Text("Italic:".into()),
+//!     Token::Format(Format::Italic),
+//!     Token::Space,
+//!     Token::Text("text".into()),
+//!     Token::Space,
+//!     Token::Format(Format::Reset),
+//!     Token::Text("reset".into()),
+//!     Token::LineBreak,
+//! ]);
+//!
+//! assert_eq!(
+//!     Stendhal::tokenize_string(input)?,
+//!     TokenList::new_from_boxed(expected_metadata, expected_tokens)
+//! );
+//! #
+//! #     Ok(())
+//! # }
+//! ```
 
 use crate::{
     error::Error,
