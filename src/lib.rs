@@ -76,7 +76,6 @@
 use std::io::{Read, Write};
 use syntax::TokenList;
 
-mod error;
 pub mod export;
 mod format;
 pub mod import;

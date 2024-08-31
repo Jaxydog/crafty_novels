@@ -17,13 +17,13 @@
 
 //! Error definitions for the crate.
 //!
-//! See [`Error`].
+//! See [`ExportError`].
 
 use crate::syntax::Token;
 
 /// Represents the various possible errors for the crate.
 #[derive(thiserror::Error, Debug)]
-pub enum Error {
+pub enum ExportError {
     /// Encountered when an no HTML entity is associated with the given [`char`].
     #[error("no HTML entity associated with character '{0}'")]
     NoSuchCharLiteral(char),

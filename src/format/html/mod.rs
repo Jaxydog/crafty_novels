@@ -67,6 +67,7 @@ use crate::{
 };
 use std::io::Write;
 
+mod error;
 mod syntax;
 #[cfg(test)]
 mod test;
@@ -154,7 +155,7 @@ impl Export for Html {
     ///
     /// # Errors
     ///
-    /// - [`Error::Io`] if it cannot write into `output`
+    /// - [`std::io::Error`] if it cannot write into `output`
     fn export_token_vector_to_writer(
         tokens: TokenList,
         output: &mut impl Write,
@@ -174,7 +175,7 @@ impl Export for Html {
         for token in tokens.tokens_as_slice() {
             token_handling::handle_token(&mut writer, &mut format_token_stack, token).map_err(
                 |e| match e {
-                    crate::error::Error::Io(e) => e,
+                    error::ExportError::Io(e) => e,
                     _ => {
                         // [`token_handling::handle_token`] states that it could return
                         // [`Error::UnexpectedToken`], but that it will never cause the necessary

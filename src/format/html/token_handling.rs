@@ -17,9 +17,8 @@
 
 //! The actual, under the hood, token-by-token exporting for the [HTML][`super::Html`] format.
 
-use super::syntax::HtmlEntity;
+use super::{error::ExportError, syntax::HtmlEntity};
 use crate::{
-    error::Error,
     syntax::{minecraft::Format, Metadata, Token},
     writer::Utf8Writer,
 };
@@ -30,16 +29,16 @@ use std::io::Write;
 ///
 /// # Errors
 ///
-/// - [`Error::UnexpectedToken`] if `format_token_stack` contains [`Format::Reset`] and
+/// - [`ExportError::UnexpectedToken`] if `format_token_stack` contains [`Format::Reset`] and
 ///   `token` is of variant [`Format::Reset`]
 ///   - [`handle_token`] itself cannot cause this state, but assumes that the owner of
 ///     `format_token_stack` could have done it
-/// - [`Error::Io`] if it cannot write into `output`
+/// - [`ExportError::Io`] if it cannot write into `output`
 pub fn handle_token(
     output: &mut Utf8Writer<impl Write>,
     format_token_stack: &mut Vec<Format>,
     token: &Token,
-) -> Result<(), Error> {
+) -> Result<(), ExportError> {
     match &token {
         Token::Text(s) => insert_string_as_html(output, s)?,
         Token::Format(f) => handle_format(output, format_token_stack, *f)?,
@@ -81,16 +80,16 @@ fn insert_string_as_html(output: &mut Utf8Writer<impl Write>, input: &str) -> st
 ///
 /// # Errors
 ///
-/// - [`Error::UnexpectedToken`] if `format_token_stack` contains [`Format::Reset`] and
+/// - [`ExportError::UnexpectedToken`] if `format_token_stack` contains [`Format::Reset`] and
 ///   `format_token` is of variant [`Format::Reset`]
 ///   - [`handle_format`] itself cannot cause this state, but assumes that the owner of
 ///     `format_token_stack` could have done it
-/// - [`Error::Io`] if it cannot write into `output`
+/// - [`ExportError::Io`] if it cannot write into `output`
 fn handle_format(
     output: &mut Utf8Writer<impl Write>,
     format_token_stack: &mut Vec<Format>,
     format_token: Format,
-) -> Result<(), Error> {
+) -> Result<(), ExportError> {
     /// Generates a match statement with [`Format`] variants to write the given HTML (containing
     /// opening tags) into `output`.
     ///
@@ -138,12 +137,12 @@ fn handle_format(
 ///
 /// # Errors
 ///
-/// - [`Error::UnexpectedToken`] if `format_token_stack` contains [`Format::Reset`]
-/// - [`Error::Io`] if it cannot write into `output`
+/// - [`ExportError::UnexpectedToken`] if `format_token_stack` contains [`Format::Reset`]
+/// - [`ExportError::Io`] if it cannot write into `output`
 fn close_formatting_tags(
     output: &mut Utf8Writer<impl Write>,
     format_token_stack: &mut Vec<Format>,
-) -> Result<(), Error> {
+) -> Result<(), ExportError> {
     /// Generates a match statement with [`Format`] variants to write the given HTML (containing
     /// closing tags) into `output`.
     macro_rules! close_html {
@@ -157,7 +156,9 @@ fn close_formatting_tags(
                 $(
                     Format::$format => $output.write_str($html)?
                 ),+ ,
-                Format::Reset => return Err(Error::UnexpectedToken(Token::Format(Format::Reset))),
+                Format::Reset => return Err(
+                    ExportError::UnexpectedToken(Token::Format(Format::Reset))
+                ),
             }
         };
     }

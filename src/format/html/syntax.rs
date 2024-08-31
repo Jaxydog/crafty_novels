@@ -22,7 +22,7 @@
 #![allow(clippy::too_many_lines)]
 #![warn(clippy::non_ascii_literal)]
 
-use crate::error::Error;
+use super::error::ExportError;
 use std::fmt::Display;
 
 /// An HTML entity.
@@ -591,26 +591,26 @@ impl From<&HtmlEntity> for HtmlEntityValue {
 }
 
 impl TryFrom<char> for HtmlEntity {
-    type Error = Error;
+    type Error = ExportError;
 
     /// Return the [`HtmlEntity`] associated with a literal character.
     ///
     /// # Errors
     ///
-    /// - [`Error::NoSuchCharLiteral`] if the [`char`] does not have an a associated [`HtmlEntity`]
+    /// - [`Self::Error::NoSuchCharLiteral`] if the [`char`] does not have an a associated [`HtmlEntity`]
     fn try_from(literal: char) -> Result<Self, Self::Error> {
         Self::try_from(&literal)
     }
 }
 
 impl TryFrom<&char> for HtmlEntity {
-    type Error = Error;
+    type Error = ExportError;
 
     /// Return the [`HtmlEntity`] associated with a literal character.
     ///
     /// # Errors
     ///
-    /// - [`Error::NoSuchCharLiteral`] if the [`char`] does not have an a associated [`HtmlEntity`]
+    /// - [`Self::Error::NoSuchCharLiteral`] if the [`char`] does not have an a associated [`HtmlEntity`]
     fn try_from(literal: &char) -> Result<Self, Self::Error> {
         /// Match literal characters with [`HtmlEntity`] variants.
         macro_rules! match_literal {
@@ -619,7 +619,7 @@ impl TryFrom<&char> for HtmlEntity {
             ) => {
                 match *literal {
                     $( $char => Ok(Self::$entity) ),+,
-                    _ => Err(Error::NoSuchCharLiteral(*literal)),
+                    _ => Err(Self::Error::NoSuchCharLiteral(*literal)),
                 }
             };
         }
