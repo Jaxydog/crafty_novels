@@ -83,12 +83,6 @@ pub mod import;
 pub mod syntax;
 mod writer;
 
-// These could return better errors -- exporting to string never error, exporting to `impl Write`
-// should only error on `std::io::Error`.
-//
-// Similarly, `Tokenize` could do with a `impl std::error::Error` (maybe something to do
-// with `std::io::Error` also?) so that implementation is more flexible.
-
 /// Methods for exporting [`TokenList`]s into other document formats.
 ///
 /// # Implementation

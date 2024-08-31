@@ -57,8 +57,8 @@ Will likely use [Iced](https://iced.rs/) to implement a simple and user-friendly
   - ~~Frontmatter export~~
 - Apply [API best practices](https://rust-lang.github.io/api-guidelines/checklist.html)
   - More/better documentation for public items
-    - Crate level docs\
-      [C-CRATE-DOC](https://rust-lang.github.io/api-guidelines/documentation.html#crate-level-docs-are-thorough-and-include-examples-c-crate-doc)
+    - ~~Crate level docs\
+      [C-CRATE-DOC](https://rust-lang.github.io/api-guidelines/documentation.html#crate-level-docs-are-thorough-and-include-examples-c-crate-doc)~~
     - All items have examples\
       [C-EXAMPLE](https://rust-lang.github.io/api-guidelines/documentation.html#all-items-have-a-rustdoc-example-c-example)
     - Examples use `?`, not `unwrap`\
