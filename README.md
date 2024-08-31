@@ -15,7 +15,7 @@ Similarly, `crafty_novels::syntax::Metadata` tokens represent meta information a
 A `crafty_novels::syntax::TokenList` represents an entire work
 by holding arrays of those `Token`s and `Metadata` tokens.
 
-Structs that implement the `crafty_novels::LexicalTokenizer` trait
+Structs that implement the `crafty_novels::Tokenize` trait
 take input (`impl std::io::Read` or `&str`) in their format's syntax
 and parse it into a `TokenList`.
 

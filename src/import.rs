@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-//! Implementations of [`Import`][`crate::Import`].
+//! Implementations of [`Tokenize`][`crate::Tokenize`].
 
 pub use crate::format::stendhal::Stendhal;
+pub use crate::format::stendhal::TokenizeError as StendhalTokenizeError;

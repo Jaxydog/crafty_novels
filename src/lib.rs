@@ -88,7 +88,8 @@ mod writer;
 /// # Implementation
 ///
 /// Behavior should be exactly the same between the two methods, so it is suggested that
-/// [`export_token_vector_to_string`] simply pass a `Vec<u8>` to [`export_token_vector_to_writer`].
+/// [`Self::export_token_vector_to_string`] simply pass a [`Vec<u8>`] to
+/// [`Self::export_token_vector_to_writer`].
 ///
 /// Implementing it this way can still be infallible:
 /// As of Rust 1.80.1, `.write_all` is infallible for [`Vec<u8>`], and a UTF-8 wrapper over a

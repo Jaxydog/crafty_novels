@@ -106,7 +106,8 @@ mod token_handling;
 ///
 /// Inside of the contents:
 ///
-/// - Plain text is written as [HTML entities][`syntax::HtmlEntity`] where applicable
+/// - Plain text is written as HTML entities where applicable
+///     - Ex. `'&'` -> `"&amp;"`
 /// - Spaces are written as just plain spaces: `' '` (without the `'`)
 ///     - `<article>` having the style `white-space:break-spaces` (mostly) preserves the spaces
 ///       without the need for `&nbsp;`
