@@ -15,14 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-//! Error definitions for the crate.
+//! Error definitions for this module.
 //!
 //! See [`ExportError`].
 
 use crate::syntax::Token;
 
-/// Represents the various possible errors for the crate.
+/// Represents the various possible errors encountered when exporting to HTML.
 #[derive(thiserror::Error, Debug)]
+#[allow(clippy::module_name_repetitions)]
 pub enum ExportError {
     /// Encountered when an no HTML entity is associated with the given [`char`].
     #[error("no HTML entity associated with character '{0}'")]

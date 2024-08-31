@@ -597,7 +597,7 @@ impl TryFrom<char> for HtmlEntity {
     ///
     /// # Errors
     ///
-    /// - [`Self::Error::NoSuchCharLiteral`] if the [`char`] does not have an a associated [`HtmlEntity`]
+    /// - [`ExportError::NoSuchCharLiteral`] if the [`char`] does not have an a associated [`HtmlEntity`]
     fn try_from(literal: char) -> Result<Self, Self::Error> {
         Self::try_from(&literal)
     }
@@ -610,7 +610,7 @@ impl TryFrom<&char> for HtmlEntity {
     ///
     /// # Errors
     ///
-    /// - [`Self::Error::NoSuchCharLiteral`] if the [`char`] does not have an a associated [`HtmlEntity`]
+    /// - [`ExportError::NoSuchCharLiteral`] if the [`char`] does not have an a associated [`HtmlEntity`]
     fn try_from(literal: &char) -> Result<Self, Self::Error> {
         /// Match literal characters with [`HtmlEntity`] variants.
         macro_rules! match_literal {

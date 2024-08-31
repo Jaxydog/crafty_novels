@@ -26,9 +26,9 @@ use crate::syntax::{minecraft::Format, ConversionError, Metadata, Token};
 ///
 /// # Errors
 ///
-/// - [`TokenizeError::MissingFormatCode`] if `'§'` isn't followed by another character
-/// - [`TokenizeError::NoSuchFormatCode`] if `'§'` isn't followed by a valid [`Format`] character
-pub fn line(output: &mut Vec<Token>, line: &str) -> Result<(), TokenizeError> {
+/// - [`ConversionError::MissingFormatCode`] if `'§'` isn't followed by another character
+/// - [`ConversionError::NoSuchFormatCode`] if `'§'` isn't followed by a valid [`Format`] character
+pub fn line(output: &mut Vec<Token>, line: &str) -> Result<(), ConversionError> {
     /// Flush the current word stack into a text node.
     fn flush(output: &mut Vec<Token>, word_stack: &mut Vec<char>) {
         if !word_stack.is_empty() {

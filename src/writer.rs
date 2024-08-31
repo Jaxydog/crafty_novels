@@ -17,7 +17,7 @@
 
 //! Implements a UTF-8 safe writer wrapper.
 //!
-//! See [`UtfWriter`].
+//! See [`Utf8Writer`].
 
 #![allow(clippy::module_name_repetitions)]
 #![allow(dead_code)]
