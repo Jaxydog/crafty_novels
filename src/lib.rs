@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License along with
 // crafty_novels. If not, see <https://www.gnu.org/licenses/>.
 
-//! `crafty_novels` is a library for converting text formats.
+//! crafty_novels is a library for converting text formats.
 //!
 //! Intended for converting Minecraft: Java Edition books to HTML, but this module contains the
 //! traits necessary to implement your own importers or exports.
@@ -67,7 +67,7 @@
 //!
 //! crafty_novels is licensed under the GNU Affero General Public License version 3, or (at your
 //! option) any later version. You should have received a copy of the GNU Affero General Public
-//! License along with `crafty_novels`, found in [LICENSE](./LICENSE). If not, see
+//! License along with crafty_novels, found in `LICENSE`. If not, see
 //! <https://www.gnu.org/licenses/>.
 
 #![warn(clippy::cargo, clippy::nursery, clippy::pedantic)]
