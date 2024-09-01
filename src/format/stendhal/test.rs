@@ -20,8 +20,10 @@
 use super::parse;
 use crate::syntax::{Metadata, Token};
 
+type Result = std::result::Result<(), Box<dyn std::error::Error>>;
+
 #[test]
-fn test_parse_frontmatter() {
+fn test_parse_frontmatter() -> Result {
     let mut lines = "title: crafty_novels
 author: RemasteredArch
 pages:
@@ -34,20 +36,27 @@ pages:
     ]
     .into();
 
-    let metadata = parse::frontmatter(&mut lines).unwrap();
+    let metadata = parse::frontmatter(&mut lines)?;
 
-    assert_eq!(lines.next().unwrap(), expected_line);
+    assert_eq!(
+        lines
+            .next()
+            .expect("there should be a line after the frontmatter"),
+        expected_line
+    );
     assert_eq!(metadata, expected_metadata);
+
+    Ok(())
 }
 
 #[test]
-fn test_line() {
+fn test_line() -> Result {
     /// Compare an an output from [`parse::line`] and the expected output.
     macro_rules! test {
         ( $( $input:expr => $expects:expr );+ ; ) => {
             $({
                 let mut output: Vec<Token> = vec![];
-                parse::line(&mut output, $input).unwrap();
+                parse::line(&mut output, $input)?;
 
                 assert_eq!(output, $expects);
             })+
@@ -141,4 +150,6 @@ fn test_line() {
             text!("&amp;</div>"), LineBreak,
         ];
     );
+
+    Ok(())
 }
