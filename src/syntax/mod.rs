@@ -44,7 +44,7 @@ impl TokenList {
         Self { metadata, tokens }
     }
 
-    /// Creates a new [`TokenList`] by consuming `Box`es.
+    /// Creates a new [`TokenList`] by consuming [`Box`]es.
     #[must_use]
     pub fn new_from_boxed(metadata: Box<[Metadata]>, tokens: Box<[Token]>) -> Self {
         Self {
