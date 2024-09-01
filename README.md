@@ -61,17 +61,17 @@ Will likely use [Iced](https://iced.rs/) to implement a simple and user-friendly
       [C-CRATE-DOC](https://rust-lang.github.io/api-guidelines/documentation.html#crate-level-docs-are-thorough-and-include-examples-c-crate-doc)~~
     - All items have examples\
       [C-EXAMPLE](https://rust-lang.github.io/api-guidelines/documentation.html#all-items-have-a-rustdoc-example-c-example)
-    - Examples use `?`, not `unwrap`\
-      [C-QUESTION-MARK](https://rust-lang.github.io/api-guidelines/documentation.html#examples-use--not-try-not-unwrap-c-question-mark)
-    - Documentation of errors from `Result` functions
+    - ~~Examples use `?`, not `unwrap`\
+      [C-QUESTION-MARK](https://rust-lang.github.io/api-guidelines/documentation.html#examples-use--not-try-not-unwrap-c-question-mark)~~
+    - ~~Documentation of errors from `Result` functions
       and other failures (including for traits)\
-      [C-FAILURE](https://rust-lang.github.io/api-guidelines/documentation.html#function-docs-include-error-panic-and-safety-considerations-c-failure)
+      [C-FAILURE](https://rust-lang.github.io/api-guidelines/documentation.html#function-docs-include-error-panic-and-safety-considerations-c-failure)~~
     - Frequently use of links in doc comments\
       [C-LINK](https://rust-lang.github.io/api-guidelines/documentation.html#prose-contains-hyperlinks-to-relevant-things-c-link)
     - Release notes and Git tags\
       [C-RELNOTES](https://rust-lang.github.io/api-guidelines/documentation.html#release-notes-document-all-significant-changes-c-relnotes)
-    - Use of `pub(crate)` and `#[doc(hidden)]` to hide unhelpful implementation details from appearing in Rustdoc\
-      [C-HIDDEN](https://rust-lang.github.io/api-guidelines/documentation.html#rustdoc-does-not-show-unhelpful-implementation-details-c-hidden)
+    - ~~Use of `pub(crate)` and `#[doc(hidden)]` to hide unhelpful implementation details from appearing in Rustdoc\
+      [C-HIDDEN](https://rust-lang.github.io/api-guidelines/documentation.html#rustdoc-does-not-show-unhelpful-implementation-details-c-hidden)~~
   - Expose intermediary steps
   - Implement common traits
     - [C-COMMON-TRAITS](https://rust-lang.github.io/api-guidelines/interoperability.html#types-eagerly-implement-common-traits-c-common-traits)
