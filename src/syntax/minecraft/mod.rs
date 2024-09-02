@@ -29,7 +29,7 @@ mod color;
 mod format_code;
 
 /// Represents the ways that Minecraft: Java Edition will format text.
-#[derive(PartialEq, Eq, Copy, Clone, Debug)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Copy, Clone, Debug)]
 pub enum Format {
     Color(Color),
     /// AKA "Magical Text Source", characters should rapidly swap between a set of characters.
@@ -39,6 +39,18 @@ pub enum Format {
     Underline,
     Italic,
     Reset,
+}
+
+impl From<FormatCode> for Format {
+    /// Look up a [`char`] against Minecraft: Java Edition's list of formatting codes.
+    ///
+    /// # Errors
+    ///
+    /// - [`ConversionError::NoSuchFormatCode`] if the [`FormatCode`] does not correspond to a
+    ///   variant of [`Format`]
+    fn from(code: FormatCode) -> Self {
+        code.format()
+    }
 }
 
 impl TryFrom<char> for Format {
@@ -51,61 +63,7 @@ impl TryFrom<char> for Format {
     /// - [`ConversionError::NoSuchFormatCode`] if the [`FormatCode`] does not correspond to a
     ///   variant of [`Format`]
     fn try_from(value: char) -> Result<Self, Self::Error> {
-        Self::try_from(FormatCode::new(value))
-    }
-}
-
-impl TryFrom<FormatCode> for Format {
-    type Error = ConversionError;
-
-    /// Look up a [`FormatCode`] against Minecraft: Java Edition's list of formatting codes.
-    ///
-    /// # Errors
-    ///
-    /// - [`ConversionError::NoSuchFormatCode`] if the [`FormatCode`] does not correspond to a
-    ///   variant of [`Format`]
-    fn try_from(code: FormatCode) -> Result<Self, Self::Error> {
-        /// Match the input [`FormatCode`] to a [`Format`] Value.
-        ///
-        /// Codes that match [`Format::Color`] are separated from other [`Format`] variants by a
-        /// semicolon.
-        macro_rules! match_code {
-            (
-                $( $color_code:expr => $color:ident ),+ ;
-                $( $format_code:expr => $format:ident ),+ ;
-            ) => {
-                match code {
-                    $( FormatCode($color_code) => Ok(Self::Color(Color::$color)) ),+,
-                    $( FormatCode($format_code) => Ok(Self::$format) ),+,
-                    FormatCode(code) => Err(Self::Error::NoSuchFormatCode(code)),
-                }
-            };
-        }
-
-        match_code!(
-            '0' => Black,
-            '1' => DarkBlue,
-            '2' => DarkGreen,
-            '3' => DarkAqua,
-            '4' => DarkRed,
-            '5' => DarkPurple,
-            '6' => Gold,
-            '7' => Gray,
-            '8' => DarkGray,
-            '9' => Blue,
-            'a' => Green,
-            'b' => Aqua,
-            'c' => Red,
-            'd' => LightPurple,
-            'e' => Yellow,
-            'f' => White;
-            'k' => Obfuscated,
-            'l' => Bold,
-            'm' => Strikethrough,
-            'n' => Underline,
-            'o' => Italic,
-            'r' => Reset;
-        )
+        Ok(FormatCode::try_from(value)?.format())
     }
 }
 
@@ -125,7 +83,9 @@ impl FromStr for Format {
     /// - [`ConversionError::NoSuchFormatCode`] if the [`FormatCode`] does not correspond to a
     ///   variant of [`Format`]
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::try_from(FormatCode::from_str(s)?)
+        let code = FormatCode::from_str(s)?;
+
+        Ok(Self::from(code))
     }
 }
 

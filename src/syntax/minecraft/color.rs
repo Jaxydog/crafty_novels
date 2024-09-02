@@ -26,7 +26,7 @@ use super::FormatCode;
 use std::fmt::{Display, UpperHex};
 
 /// Represents the possible text colors (foreground and background) in Minecraft: Java Edition.
-#[derive(PartialEq, Eq, Copy, Clone, Debug)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Copy, Clone, Debug)]
 pub enum Color {
     Black,
     DarkBlue,
@@ -52,31 +52,31 @@ impl From<Color> for ColorValue {
         /// Match the input [`Color`] to a hardcoded [`ColorValue`].
         macro_rules! color_match {
             ( $(
-                $color:ident => $code:expr, $name:expr, $fg:expr, $bg:expr
+                $color:ident => $name:expr, $fg:expr, $bg:expr
             );+ ; ) => {
                 match color {$(
-                    Color::$color => ColorValue::new(FormatCode::new($code), $name, $fg, $bg)
+                    Color::$color => ColorValue::new(FormatCode::from(Color::$color), $name, $fg, $bg)
                 ),+}
             };
         }
 
         color_match!(
-            Black       => '0', "black",        (0,   0,   0  ), (0,  0,  0 );
-            DarkBlue    => '1', "dark_blue",    (0,   0,   170), (0,  0,  42);
-            DarkGreen   => '2', "dark_green",   (0,   170, 0  ), (0,  42, 0 );
-            DarkAqua    => '3', "dark_aqua",    (0,   170, 170), (0,  42, 42);
-            DarkRed     => '4', "dark_red",     (170, 0,   0  ), (42, 0,  0 );
-            DarkPurple  => '5', "dark_purple",  (170, 0,   170), (42, 0,  42);
-            Gold        => '6', "gold",         (255, 170, 0  ), (42, 42, 0 );
-            Gray        => '7', "gray",         (170, 170, 170), (42, 42, 42);
-            DarkGray    => '8', "dark_gray",    (85,  85,  85 ), (21, 21, 21);
-            Blue        => '9', "blue",         (85,  85,  255), (21, 21, 63);
-            Green       => 'a', "green",        (85,  255, 85 ), (21, 63, 21);
-            Aqua        => 'b', "aqua",         (85,  255, 255), (21, 63, 63);
-            Red         => 'c', "red",          (255, 85,  85 ), (63, 21, 21);
-            LightPurple => 'd', "light_purple", (255, 85,  255), (63, 21, 63);
-            Yellow      => 'e', "yellow",       (255, 255, 85 ), (63, 63, 21);
-            White       => 'f', "white",        (255, 255, 255), (63, 63, 63);
+            Black       => "black",        (0,   0,   0  ), (0,  0,  0 );
+            DarkBlue    => "dark_blue",    (0,   0,   170), (0,  0,  42);
+            DarkGreen   => "dark_green",   (0,   170, 0  ), (0,  42, 0 );
+            DarkAqua    => "dark_aqua",    (0,   170, 170), (0,  42, 42);
+            DarkRed     => "dark_red",     (170, 0,   0  ), (42, 0,  0 );
+            DarkPurple  => "dark_purple",  (170, 0,   170), (42, 0,  42);
+            Gold        => "gold",         (255, 170, 0  ), (42, 42, 0 );
+            Gray        => "gray",         (170, 170, 170), (42, 42, 42);
+            DarkGray    => "dark_gray",    (85,  85,  85 ), (21, 21, 21);
+            Blue        => "blue",         (85,  85,  255), (21, 21, 63);
+            Green       => "green",        (85,  255, 85 ), (21, 63, 21);
+            Aqua        => "aqua",         (85,  255, 255), (21, 63, 63);
+            Red         => "red",          (255, 85,  85 ), (63, 21, 21);
+            LightPurple => "light_purple", (255, 85,  255), (63, 21, 63);
+            Yellow      => "yellow",       (255, 255, 85 ), (63, 63, 21);
+            White       => "white",        (255, 255, 255), (63, 63, 63);
         )
     }
 }
