@@ -17,7 +17,8 @@
 
 //! Tests for [`FormatCode`].
 
-use super::*;
+use super::super::{Color, Format, FormatCode};
+use std::str::FromStr;
 
 type Result = std::result::Result<(), Box<dyn std::error::Error>>;
 
