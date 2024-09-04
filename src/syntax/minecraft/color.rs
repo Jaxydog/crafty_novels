@@ -96,6 +96,7 @@ impl From<Color> for ColorValue {
 ///
 /// // Has no constructor, as it is designed to represent values for the `Color` enum
 /// let blue = ColorValue::from(Color::Blue);
+/// assert_eq!(blue, ColorValue::new(Color::Blue)); // `ColorValue::new` just wraps `From<Color>`
 ///
 /// // Stores colors as 24-bit `Rgb` values
 /// assert_eq!(blue.fg(), Rgb::new(85, 85, 255));
@@ -115,7 +116,7 @@ impl From<Color> for ColorValue {
 /// assert_eq!(format!("{:X}", blue.bg()), "15153F");
 /// ```
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct ColorValue {
     /// The character following the § in the code assocated with the color.
     ///
@@ -136,6 +137,12 @@ pub struct ColorValue {
 }
 
 impl ColorValue {
+    /// Get the values associated with a given [`Color`] in Minecraft: Java Edition.
+    #[must_use]
+    pub fn new(color: Color) -> Self {
+        Self::from(color)
+    }
+
     /// Returns the [`Color`] it represents.
     #[must_use]
     pub const fn color(&self) -> Color {
