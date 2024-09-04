@@ -22,7 +22,7 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use std::fmt::{Display, UpperHex};
+mod display;
 
 /// Represents the possible text colors (foreground and background) in Minecraft: Java Edition.
 #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Copy, Clone, Debug)]
@@ -211,59 +211,5 @@ impl Rgb {
 impl From<(u8, u8, u8)> for Rgb {
     fn from(value: (u8, u8, u8)) -> Self {
         Self::new(value.0, value.1, value.2)
-    }
-}
-
-impl Display for Rgb {
-    /// Displays the color in hexadecimal with a leading `'#'` (`"#RRGGBB"`).
-    ///
-    /// Ex. `(255, 255, 255)` -> `"#FFFFFF"`.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "#{self:X}")
-    }
-}
-
-impl UpperHex for Rgb {
-    /// Displays the color in hexadecimal without a leading `#` (`"RRGGBB"`).
-    ///
-    /// Ex. `(255, 255, 255)` -> `"FFFFFF"`.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:X}{:X}{:X}", self.red(), self.green(), self.blue())
-    }
-}
-
-impl Display for ColorValue {
-    /// Displays the foreground color in hexadecimal with a leading `'#'` (`"#RRGGBB"`).
-    ///
-    /// Ex. `(255, 255, 255)` -> `"#FFFFFF"`.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.fg())
-    }
-}
-
-impl UpperHex for ColorValue {
-    /// Displays the color in hexadecimal without a leading `'#'` (`"RRGGBB"`).
-    ///
-    /// Ex. `(255, 255, 255)` -> `"FFFFFF"`.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:X}", self.fg())
-    }
-}
-
-impl Display for Color {
-    /// Displays the foreground color in hexadecimal with a leading `'#'` (`"#RRGGBB"`).
-    ///
-    /// Ex. `(255, 255, 255)` -> `"#FFFFFF"`.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", ColorValue::from(*self))
-    }
-}
-
-impl UpperHex for Color {
-    /// Displays the color in hexadecimal without a leading `'#'` (`"RRGGBB"`).
-    ///
-    /// Ex. `(255, 255, 255)` -> `"FFFFFF"`.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:X}", ColorValue::from(*self))
     }
 }
