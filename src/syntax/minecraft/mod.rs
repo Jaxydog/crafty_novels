@@ -21,7 +21,7 @@
 //! See [`Format`].
 
 use super::ConversionError;
-pub use color::{Color, ColorTuple, ColorValue};
+pub use color::{Color, ColorValue, Rgb};
 pub use format_code::FormatCode;
 use std::str::FromStr;
 

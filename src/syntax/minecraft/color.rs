@@ -54,9 +54,14 @@ impl From<Color> for ColorValue {
             ( $(
                 $color:ident => $name:expr, $fg:expr, $bg:expr
             );+ ; ) => {
-                match color {$(
-                    Color::$color => ColorValue::new(FormatCode::from(Color::$color), $name, $fg, $bg)
-                ),+}
+                match color { $(
+                    Color::$color => ColorValue {
+                        code: FormatCode::from(Color::$color),
+                        name: $name.to_owned().into_boxed_str(),
+                        fg: $fg.into(),
+                        bg: $bg.into()
+                    }
+                ),+ }
             };
         }
 
@@ -81,51 +86,129 @@ impl From<Color> for ColorValue {
     }
 }
 
-/// Represents a color as it is used for text formatting in Minecraft.
+/// Represents a [`Color`] as it is used for text formatting in Minecraft.
+///
+///
+///
+/// # Examples
+///
+/// ```rust
+/// use crafty_novels::syntax::minecraft::{ColorValue, Color, Rgb};
+///
+/// let blue = ColorValue::from(Color::Blue);
+///
+/// // Stores colors as 24-bit `Rgb` values
+/// assert_eq!(blue.fg(), Rgb::new(85, 85, 255));
+/// assert_eq!(blue.bg(), Rgb::new(21, 21, 63));
+///
+/// // Implements `UpperHex` as `"RRGGBB"`, which it uses to `Display` as an HTML-style hex color
+/// // (`"#RRGGBB"`)
+/// assert_eq!(format!("{blue}"), "#5555FF"); // With the leading `'#'`
+/// assert_eq!(format!("{blue:X}"), "5555FF"); // Without the `'#'`
+///
+/// // Calling `Display` directly on the `ColorValue` uses the foreground color
+/// assert_eq!(format!("{blue}"), format!("{}", blue.fg()));
+/// assert_eq!(format!("{blue:X}"), format!("{:X}", blue.fg()));
+///
+/// // But you can `Display` the background color directly instead
+/// assert_eq!(format!("{}", blue.bg()), "#15153F");
+/// assert_eq!(format!("{:X}", blue.bg()), "15153F");
+/// ```
 #[allow(dead_code)]
 #[derive(Clone)]
 pub struct ColorValue {
     /// The character following the § in the code assocated with the color.
     ///
     /// Ex. The `'0'` in `"§0"`.
-    pub code: FormatCode,
+    code: FormatCode,
     /// The proper name associated with the color.
     ///
     /// Ex. `"gold"`.
-    pub name: Box<str>,
+    name: Box<str>,
     /// The foreground color assocated with the color.
     ///
     /// Ex. `(255, 170, 0)`.
-    pub fg: ColorTuple,
+    fg: Rgb,
     /// The background color assocated with the color.
     ///
     /// Ex. `(42, 42, 0)`.
-    pub bg: ColorTuple,
+    bg: Rgb,
 }
 
 impl ColorValue {
-    /// Create a new instance of [`Color`], doing type conversions where necessary.
-    pub fn new(
-        code: FormatCode,
-        name: impl AsRef<str>,
-        fg: (u8, u8, u8),
-        bg: (u8, u8, u8),
-    ) -> Self {
-        Self {
-            code,
-            name: name.as_ref().to_owned().into_boxed_str(),
-            fg: fg.into(),
-            bg: bg.into(),
-        }
+    /// Returns the inner [`FormatCode`] corresponding to the color.
+    #[must_use]
+    pub const fn code(&self) -> FormatCode {
+        self.code
+    }
+
+    /// Returns the name of the color.
+    #[must_use]
+    pub const fn name(&self) -> &str {
+        &self.name
+    }
+
+    /// Returns the [`Rgb`] value of the foreground variant of the color.
+    #[must_use]
+    pub const fn fg(&self) -> Rgb {
+        self.fg
+    }
+
+    /// Returns the [`Rgb`] value of the background variant of the color.
+    #[must_use]
+    pub const fn bg(&self) -> Rgb {
+        self.bg
     }
 }
 
-/// Represents R, G, and B values.
-#[derive(Copy, Clone)]
-pub struct ColorTuple(pub u8, pub u8, pub u8);
+/// Represents a 24-bit RGB color value.
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Rgb {
+    red: u8,
+    green: u8,
+    blue: u8,
+}
 
-impl Display for ColorTuple {
-    /// Displays the color in hexadecimal with a leading `'#'`.
+impl Rgb {
+    /// Create a new [`Rgb`] value.
+    #[must_use]
+    pub const fn new(red: u8, green: u8, blue: u8) -> Self {
+        Self { red, green, blue }
+    }
+
+    /// Returns the color as a tuple of bytes.
+    #[must_use]
+    pub const fn as_tuple(&self) -> (u8, u8, u8) {
+        (self.red(), self.green(), self.blue())
+    }
+
+    /// Returns the red value of the color.
+    #[must_use]
+    pub const fn red(&self) -> u8 {
+        self.red
+    }
+
+    /// Returns the green value of the color.
+    #[must_use]
+    pub const fn green(&self) -> u8 {
+        self.green
+    }
+
+    /// Returns the blue value of the color.
+    #[must_use]
+    pub const fn blue(&self) -> u8 {
+        self.blue
+    }
+}
+
+impl From<(u8, u8, u8)> for Rgb {
+    fn from(value: (u8, u8, u8)) -> Self {
+        Self::new(value.0, value.1, value.2)
+    }
+}
+
+impl Display for Rgb {
+    /// Displays the color in hexadecimal with a leading `'#'` (`"#RRGGBB"`).
     ///
     /// Ex. `(255, 255, 255)` -> `"#FFFFFF"`.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -133,23 +216,47 @@ impl Display for ColorTuple {
     }
 }
 
-impl UpperHex for ColorTuple {
-    /// Displays the color in hexadecimal without a leading `#`.
+impl UpperHex for Rgb {
+    /// Displays the color in hexadecimal without a leading `#` (`"RRGGBB"`).
     ///
     /// Ex. `(255, 255, 255)` -> `"FFFFFF"`.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:X}{:X}{:X}", self.0, self.1, self.2)
+        write!(f, "{:X}{:X}{:X}", self.red(), self.green(), self.blue())
     }
 }
 
-impl From<(u8, u8, u8)> for ColorTuple {
-    fn from(value: (u8, u8, u8)) -> Self {
-        Self(value.0, value.1, value.2)
+impl Display for ColorValue {
+    /// Displays the foreground color in hexadecimal with a leading `'#'` (`"#RRGGBB"`).
+    ///
+    /// Ex. `(255, 255, 255)` -> `"#FFFFFF"`.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.fg())
+    }
+}
+
+impl UpperHex for ColorValue {
+    /// Displays the color in hexadecimal without a leading `'#'` (`"RRGGBB"`).
+    ///
+    /// Ex. `(255, 255, 255)` -> `"FFFFFF"`.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:X}", self.fg())
     }
 }
 
 impl Display for Color {
+    /// Displays the foreground color in hexadecimal with a leading `'#'` (`"#RRGGBB"`).
+    ///
+    /// Ex. `(255, 255, 255)` -> `"#FFFFFF"`.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", ColorValue::from(*self).fg)
+        write!(f, "{}", ColorValue::from(*self))
+    }
+}
+
+impl UpperHex for Color {
+    /// Displays the color in hexadecimal without a leading `'#'` (`"RRGGBB"`).
+    ///
+    /// Ex. `(255, 255, 255)` -> `"FFFFFF"`.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:X}", ColorValue::from(*self))
     }
 }
