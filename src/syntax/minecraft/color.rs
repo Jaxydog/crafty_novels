@@ -22,7 +22,6 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use super::FormatCode;
 use std::fmt::{Display, UpperHex};
 
 /// Represents the possible text colors (foreground and background) in Minecraft: Java Edition.
@@ -51,12 +50,12 @@ impl From<Color> for ColorValue {
     fn from(color: Color) -> Self {
         /// Match the input [`Color`] to a hardcoded [`ColorValue`].
         macro_rules! color_match {
-            ( $(
+            ( $value:expr => { $(
                 $color:ident => $name:expr, $fg:expr, $bg:expr
-            );+ ; ) => {
-                match color { $(
+            );+ ; } ) => {
+                match $value { $(
                     Color::$color => ColorValue {
-                        code: FormatCode::from(Color::$color),
+                        color: Color::$color,
                         name: $name.to_owned().into_boxed_str(),
                         fg: $fg.into(),
                         bg: $bg.into()
@@ -65,7 +64,7 @@ impl From<Color> for ColorValue {
             };
         }
 
-        color_match!(
+        color_match!(color => {
             Black       => "black",        (0,   0,   0  ), (0,  0,  0 );
             DarkBlue    => "dark_blue",    (0,   0,   170), (0,  0,  42);
             DarkGreen   => "dark_green",   (0,   170, 0  ), (0,  42, 0 );
@@ -82,19 +81,20 @@ impl From<Color> for ColorValue {
             LightPurple => "light_purple", (255, 85,  255), (63, 21, 63);
             Yellow      => "yellow",       (255, 255, 85 ), (63, 63, 21);
             White       => "white",        (255, 255, 255), (63, 63, 63);
-        )
+        })
     }
 }
 
 /// Represents a [`Color`] as it is used for text formatting in Minecraft.
 ///
-///
+/// To reprsent an arbitrary RGB color, see [`Rgb`].
 ///
 /// # Examples
 ///
 /// ```rust
 /// use crafty_novels::syntax::minecraft::{ColorValue, Color, Rgb};
 ///
+/// // Has no constructor, as it is designed to represent values for the `Color` enum
 /// let blue = ColorValue::from(Color::Blue);
 ///
 /// // Stores colors as 24-bit `Rgb` values
@@ -120,7 +120,7 @@ pub struct ColorValue {
     /// The character following the § in the code assocated with the color.
     ///
     /// Ex. The `'0'` in `"§0"`.
-    code: FormatCode,
+    color: Color,
     /// The proper name associated with the color.
     ///
     /// Ex. `"gold"`.
@@ -136,10 +136,10 @@ pub struct ColorValue {
 }
 
 impl ColorValue {
-    /// Returns the inner [`FormatCode`] corresponding to the color.
+    /// Returns the [`Color`] it represents.
     #[must_use]
-    pub const fn code(&self) -> FormatCode {
-        self.code
+    pub const fn color(&self) -> Color {
+        self.color
     }
 
     /// Returns the name of the color.
